@@ -6,7 +6,7 @@
 const char* scene_folder_select_name = "folder_select";
 
 static C2D_TextBuf g_staticBuf, g_dynamicBuf;
-static C2D_Text g_staticText;
+static C2D_Text g_staticText, g_staticTitle;
 
 static s32 current_selection;
 
@@ -104,9 +104,11 @@ bool scene_folder_select_init(AppState* state) {
 
 	// // Parse the static text strings
 	C2D_TextParse(&g_staticText, g_staticBuf, "Select folder or press  to create a new one\nPress  to remove, or SELECT to rename");
+	C2D_TextParse(&g_staticTitle, g_staticBuf, "Notebook3DS");
 
 	// Optimize the static text strings
 	C2D_TextOptimize(&g_staticText);
+	C2D_TextOptimize(&g_staticTitle);
     return true;
 }
 const char* scene_folder_select_input(AppState* state, u32 down, u32 held) {
@@ -191,6 +193,8 @@ const char* scene_folder_select_render(AppState* state, C3D_RenderTarget* top, C
     C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
     C2D_TargetClear(top, C2D_Color32(245, 162, 206, 0xFF));
     C2D_SceneBegin(top);
+
+	C2D_DrawText(&g_staticTitle, C2D_AlignCenter, 200, 100, 0, .8, .8);
 
     C3D_FrameEnd(0);
 
