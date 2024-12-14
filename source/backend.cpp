@@ -58,6 +58,9 @@ vector<uint8_t> page2bin(Page page) {
         out.push_back(ind);
         push_back_bytes(&out, sizeof(uint32_t));
         write_bytes_to_end(&out, (uint8_t*)&page.shapes[i].color, sizeof(uint32_t));
+        uint32_t thickness_conv = (uint32_t)(page.shapes[i].thickness * 1000); // CRUTCH: simply using float crashes 3ds
+        push_back_bytes(&out, sizeof(uint32_t));
+        write_bytes_to_end(&out, (uint8_t*)&thickness_conv, sizeof(uint32_t));
         uint32_t points_len = page.shapes[i].points.size();
         push_back_bytes(&out, sizeof(uint32_t));
         write_bytes_to_end(&out, (uint8_t*)&points_len, sizeof(uint32_t));
@@ -80,6 +83,9 @@ Page bin2page(vector<uint8_t> bin) {
         shape.type = shape_types[bin[ind]]; // u8
         ind += sizeof(uint8_t);
         shape.color = *(uint32_t*)(bin.data() + ind); // u32
+        ind += sizeof(uint32_t);
+        shape.thickness = *(uint32_t*)(bin.data() + ind); // u32
+        shape.thickness /= 1000;
         ind += sizeof(uint32_t);
         uint32_t points_len = *(uint32_t*)(bin.data() + ind);
         ind += sizeof(uint32_t);

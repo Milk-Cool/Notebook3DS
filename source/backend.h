@@ -25,6 +25,7 @@ typedef enum {
 typedef struct {
     ShapeType type;
     uint32_t color;
+    float thickness;
     vector<Point> points;
 } Shape;
 typedef struct {

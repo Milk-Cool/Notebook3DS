@@ -1,5 +1,6 @@
 #include "scene_folder_select.h"
 #include "backend.h"
+#include "draw.h"
 
 const char* scene_folder_select_name = "folder_select";
 
@@ -7,6 +8,8 @@ static float textSize = 0.5f;
 
 static C2D_TextBuf g_staticBuf, g_dynamicBuf;
 static C2D_Text g_staticText[4];
+
+static Page new_page;
 
 bool scene_folder_select_init(AppState* state) {
 	// Create two text buffers: one for static text, and another one for
@@ -20,23 +23,34 @@ bool scene_folder_select_init(AppState* state) {
 	Shape shape1;
 	shape1.color = 0xffff00ff;
 	shape1.type = ShapeTypeLine;
+	shape1.thickness = 2;
 	shape1.points.push_back((Point){ .x = 30, .y = 50 });
 	shape1.points.push_back((Point){ .x = 130, .y = 150 });
+	shape1.points.push_back((Point){ .x = 200, .y = 30 });
 	test_page.shapes.push_back(shape1);
 
-	Shape shape2;
-	shape2.color = 0xff00ffff;
-	shape2.type = ShapeTypeFillRect;
-	shape2.points.push_back((Point){ .x = 70, .y = 90 });
-	shape2.points.push_back((Point){ .x = 170, .y = 190 });
-	test_page.shapes.push_back(shape2);
+	// Shape shape2;
+	// shape2.color = 0xff00ffff;
+	// shape2.type = ShapeTypeFillRect;
+	// shape2.thickness = .5;
+	// shape2.points.push_back((Point){ .x = 70, .y = 90 });
+	// shape2.points.push_back((Point){ .x = 170, .y = 190 });
+	// test_page.shapes.push_back(shape2);
+
+	Shape shape3;
+	shape3.color = 0xff0000ff;
+	shape3.type = ShapeTypeHollowRect;
+	shape3.thickness = 7;
+	shape3.points.push_back((Point){ .x = 90, .y = 110 });
+	shape3.points.push_back((Point){ .x = 190, .y = 210 });
+	test_page.shapes.push_back(shape3);
 
 	// vector<Folder> folders = get_folders();
 	// for(Folder folder : folders) {
 	// 	str += folder.name + "\n";
 	// }
 	vector<uint8_t> buf = page2bin(test_page);
-	Page new_page = bin2page(buf);
+	new_page = bin2page(buf);
 
 	for(uint8_t i = 0; i < new_page.shapes.size(); i++) {
 		Shape cur = new_page.shapes[i];
@@ -52,6 +66,7 @@ bool scene_folder_select_init(AppState* state) {
 				break;
 		}
 		str += to_string(cur.color) + " ";
+		str += to_string(cur.thickness) + " ";
 		for(uint8_t j = 0; j < cur.points.size(); j++)
 			str += to_string(cur.points[j].x) + " " + to_string(cur.points[j].y) + " ";
 		str += ";\n";
@@ -109,7 +124,13 @@ const char* scene_folder_select_render(AppState* state, C3D_RenderTarget* top) {
 	C2D_TextParse(&dynText, g_dynamicBuf, buf);
 	C2D_TextOptimize(&dynText);
 	C2D_DrawText(&dynText, C2D_AlignCenter, 200.0f, 220.0f, 0.5f, 0.5f, 0.5f);
+
+	for(uint8_t i = 0; i < new_page.shapes.size(); i++) {
+		draw_shape(top, new_page.shapes[i]);
+	}
+
     C3D_FrameEnd(0);
+
     return "";
 }
 void scene_folder_select_deinit(AppState* state) {
