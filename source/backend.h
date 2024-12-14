@@ -44,6 +44,12 @@ typedef struct {
 
 void init_backend();
 vector<Folder> get_folders();
+vector<Topic> get_topics(string folder_id);
+vector<Page> get_pages(string folder_id, string topic_id);
+
+string create_folder(string folder_name);
+string create_topic(string folder_id, string topic_name);
+void save_page(string folder_id, string topic_id, Page page);
 
 vector<uint8_t> page2bin(Page page); // does not initialize the index
 Page bin2page(vector<uint8_t> bin);

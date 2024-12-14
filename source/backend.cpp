@@ -29,6 +29,122 @@ vector<Folder> get_folders() {
     return out;
 }
 
+vector<Topic> get_topics(string folder_id) {
+    vector<Topic> out;
+    char folder_path[256];
+    snprintf(folder_path, 256, PATH_ROOT "%s/", folder_id.c_str());
+    DIR* dir = opendir(folder_path);
+    struct dirent* entry;
+    if(!dir) return out;
+    while((entry = readdir(dir)) != NULL) {
+        if(entry->d_type != DT_DIR) continue;
+        Topic topic;
+        topic.id = entry->d_name;
+        char path[256];
+        sniprintf(path, 256, "%s%s/%s", folder_path, entry->d_name, NAMEFILE);
+        FILE* file = fopen(path, "r");
+        if(file == nullptr) continue;
+        char name[256];
+        fgets(name, 256, file);
+        fclose(file);
+        topic.name = strdup(name);
+        out.push_back(topic);
+    }
+    closedir(dir);
+    return out;
+}
+
+vector<Page> get_pages(string folder_id, string topic_id) {
+    vector<Page> out;
+    char topic_path[256];
+    snprintf(topic_path, 256, PATH_ROOT "%s/%s/", folder_id.c_str(), topic_id.c_str());
+    DIR* dir = opendir(topic_path);
+    struct dirent* entry;
+    if(!dir) return out;
+    while((entry = readdir(dir)) != NULL) {
+        if(entry->d_type != DT_REG) continue;
+        if(!strcmp(entry->d_name, NAMEFILE)) continue;
+        char path[256];
+        sniprintf(path, 256, "%s%s", topic_path, entry->d_name);
+        FILE* file = fopen(path, "r");
+        if(file == nullptr) continue;
+        fseek(file, 0, SEEK_END);
+        size_t size = ftell(file);
+        fseek(file, 0, SEEK_SET);
+        uint8_t buf[size];
+        fgets((char*)buf, size, file);
+        fclose(file);
+        Page page = bin2page(buf, size);
+        page.index = stoul(entry->d_name);
+        out.push_back(page);
+    }
+    closedir(dir);
+    return out;
+}
+
+string create_folder(string folder_name) {
+    DIR* dir = opendir(PATH_ROOT);
+    struct dirent* entry;
+    if(!dir) return "";
+    uint32_t max_n = 0;
+    while((entry = readdir(dir)) != NULL) {
+        if(entry->d_type != DT_DIR) continue;
+        unsigned long int name = stoul(entry->d_name);
+        if(name > max_n) max_n = name;
+    }
+    string folder_id = to_string(max_n + 1);
+
+    char folder_path[256];
+    snprintf(folder_path, 256, PATH_ROOT "%s/", folder_id.c_str());
+    struct stat st = { 0 };
+    if(stat(folder_path, &st) != -1) return "";
+    mkdir(folder_path, 0700);
+    char name_path[512];
+    snprintf(name_path, 512, "%s%s", folder_path, NAMEFILE);
+    FILE* name = fopen(name_path, "w");
+    fwrite(folder_name.c_str(), folder_name.size(), 1, name);
+    fclose(name);
+
+    return folder_id;
+}
+
+string create_topic(string folder_id, string topic_name) {
+    char folder_path[256];
+    snprintf(folder_path, 256, PATH_ROOT "%s/", folder_id.c_str());
+    DIR* dir = opendir(folder_path);
+    struct dirent* entry;
+    if(!dir) return "";
+    uint32_t max_n = 0;
+    while((entry = readdir(dir)) != NULL) {
+        if(entry->d_type != DT_DIR) continue;
+        unsigned long int name = stoul(entry->d_name);
+        if(name > max_n) max_n = name;
+    }
+    string topic_id = to_string(max_n + 1);
+
+    char topic_path[512];
+    snprintf(topic_path, 512, "%s%s/", folder_path, topic_id.c_str());
+    struct stat st = { 0 };
+    if(stat(topic_path, &st) != -1) return "";
+    mkdir(topic_path, 0700);
+    char name_path[1024];
+    snprintf(name_path, 1024, "%s%s", topic_path, NAMEFILE);
+    FILE* name = fopen(name_path, "w");
+    fwrite(topic_name.c_str(), topic_name.size(), 1, name);
+    fclose(name);
+    return topic_id;
+}
+
+void save_page(string folder_id, string topic_id, Page page) {
+    string page_n = to_string(page.index);
+    char page_path[256];
+    sniprintf(page_path, 256, PATH_ROOT "%s/%s/%s", folder_id.c_str(), topic_id.c_str(), page_n.c_str());
+    FILE* file = fopen(page_path, "w");
+    vector<uint8_t> bin = page2bin(page);
+    fwrite(bin.data(), 1, bin.size(), file);
+    fclose(file);
+}
+
 static ShapeType shape_types[] = {
     ShapeTypeFillRect,
     ShapeTypeHollowRect,

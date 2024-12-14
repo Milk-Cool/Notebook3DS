@@ -67,6 +67,7 @@ bool scene_folder_select_init(AppState* state) {
 	fwrite(buf.data(), 1, buf.size(), f);
 	fclose(f);
 	new_page = bin2page(buf);
+	new_page.index = 0;
 
 	for(uint8_t i = 0; i < new_page.shapes.size(); i++) {
 		Shape cur = new_page.shapes[i];
@@ -98,9 +99,21 @@ bool scene_folder_select_init(AppState* state) {
 	C2D_TextOptimize(&g_staticText);
     return true;
 }
+void save_as_test() {
+	string folder_id = create_folder("TestFolder01");
+	if(folder_id == "") return;
+	string topic_id = create_topic(folder_id, "TestTopic");
+	if(topic_id == "") return;
+	save_page(folder_id, topic_id, new_page);
+}
 const char* scene_folder_select_input(AppState* state, u32 down, u32 held) {
-    if (down & KEY_START)
+    if (down & KEY_START) {
         return nullptr;
+	}
+
+	if(down & KEY_DUP) {
+		save_as_test();
+	}
 
     if (held & KEY_L)
         textSize -= 1.0f/128;
