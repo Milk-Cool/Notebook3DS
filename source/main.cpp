@@ -22,7 +22,7 @@ AppState state;
 stack<u32> scene_stack;
 typedef bool (*SceneInit)(AppState* state);
 typedef const char* (*SceneInput)(AppState* state, u32 down, u32 held);
-typedef const char* (*SceneRender)(AppState* state, C3D_RenderTarget* top);
+typedef const char* (*SceneRender)(AppState* state, C3D_RenderTarget* top, C3D_RenderTarget* bottom);
 typedef void (*SceneDeinit)(AppState* state);
 typedef struct {
 	const char* name;
@@ -73,6 +73,7 @@ int main()
 
 	// Create screen
 	C3D_RenderTarget* top = C2D_CreateScreenTarget(GFX_TOP, GFX_LEFT);
+	C3D_RenderTarget* bottom = C2D_CreateScreenTarget(GFX_BOTTOM, GFX_LEFT);
 
 	scene_stack.push(0);
 	if(!scenes[0].init(&state)) {
@@ -102,7 +103,7 @@ int main()
 		}
 
 		// Render the scene
-		const char* res_render = scenes[current_scene].render(&state, top);
+		const char* res_render = scenes[current_scene].render(&state, top, bottom);
 		if(res_render == nullptr) {
 			scenes[current_scene].deinit(&state);
 			scene_stack.pop();
