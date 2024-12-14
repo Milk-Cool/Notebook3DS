@@ -1,11 +1,12 @@
 #pragma once
-#include <list>
 #include <string>
 #include <cstring>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <sys/dirent.h>
+#include <vector>
+#include <list>
 using namespace std;
 
 typedef struct {
@@ -24,11 +25,11 @@ typedef enum {
 typedef struct {
     ShapeType type;
     uint32_t color;
-    list<Point> points;
+    vector<Point> points;
 } Shape;
 typedef struct {
     uint32_t index;
-    list<Shape> shapes;
+    vector<Shape> shapes;
 } Page;
 typedef struct {
 	string id;
@@ -39,4 +40,8 @@ typedef struct {
 #define NAMEFILE ".notebook"
 
 void init_backend();
-list<Folder> get_folders();
+vector<Folder> get_folders();
+
+vector<uint8_t> page2bin(Page page); // does not initialize the index
+Page bin2page(vector<uint8_t> bin);
+Page bin2page(uint8_t* bin, size_t size);

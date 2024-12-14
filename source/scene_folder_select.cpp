@@ -15,9 +15,46 @@ bool scene_folder_select_init(AppState* state) {
 	g_dynamicBuf = C2D_TextBufNew(4096);
 
 	string str = "";
-	list<Folder> folders = get_folders();
-	for(Folder folder : folders) {
-		str += folder.name + "\n";
+	Page test_page;
+
+	Shape shape1;
+	shape1.color = 0xffff00ff;
+	shape1.type = ShapeTypeLine;
+	shape1.points.push_back((Point){ .x = 30, .y = 50 });
+	shape1.points.push_back((Point){ .x = 130, .y = 150 });
+	test_page.shapes.push_back(shape1);
+
+	Shape shape2;
+	shape2.color = 0xff00ffff;
+	shape2.type = ShapeTypeFillRect;
+	shape2.points.push_back((Point){ .x = 70, .y = 90 });
+	shape2.points.push_back((Point){ .x = 170, .y = 190 });
+	test_page.shapes.push_back(shape2);
+
+	// vector<Folder> folders = get_folders();
+	// for(Folder folder : folders) {
+	// 	str += folder.name + "\n";
+	// }
+	vector<uint8_t> buf = page2bin(test_page);
+	Page new_page = bin2page(buf);
+
+	for(uint8_t i = 0; i < new_page.shapes.size(); i++) {
+		Shape cur = new_page.shapes[i];
+		switch(cur.type) {
+			case ShapeTypeFillRect:
+				str += "fillrect ";
+				break;
+			case ShapeTypeHollowRect:
+				str += "hollowrect ";
+				break;
+			case ShapeTypeLine:
+				str += "line ";
+				break;
+		}
+		str += to_string(cur.color) + " ";
+		for(uint8_t j = 0; j < cur.points.size(); j++)
+			str += to_string(cur.points[j].x) + " " + to_string(cur.points[j].y) + " ";
+		str += ";\n";
 	}
 
 	// Parse the static text strings
