@@ -1,6 +1,7 @@
 #include "scene_folder_select.h"
 #include "backend.h"
 #include "draw.h"
+#include "common.h"
 
 const char* scene_folder_select_name = "folder_select";
 
@@ -15,6 +16,9 @@ void init_folders(AppState* state) {
 }
 void deinit_folders(AppState* state) {
 	state->folders.erase(state->folders.begin(), state->folders.end());
+}
+void reinit_folders(AppState* state) {
+	deinit_folders(state); init_folders(state);
 }
 
 bool scene_folder_select_init(AppState* state) {
@@ -99,9 +103,9 @@ bool scene_folder_select_init(AppState* state) {
 	// }
 
 	// // Parse the static text strings
-	C2D_TextParse(&g_staticText, g_staticBuf, "Select folder or press  to create a new one");
+	C2D_TextParse(&g_staticText, g_staticBuf, "Select folder or press  to create a new one\nPress  to remove, or SELECT to rename");
 
-	// // Optimize the static text strings
+	// Optimize the static text strings
 	C2D_TextOptimize(&g_staticText);
     return true;
 }
@@ -119,17 +123,19 @@ const char* scene_folder_select_input(AppState* state, u32 down, u32 held) {
 	}
 
 	if(down & KEY_X) {
-		SwkbdState swkbd;
-		char name[60];
-		SwkbdButton button = SWKBD_BUTTON_NONE;
-		swkbdInit(&swkbd, SWKBD_TYPE_NORMAL, 2, -1);
-		swkbdSetHintText(&swkbd, "Enter the folder name");
-		swkbdSetButton(&swkbd, SWKBD_BUTTON_LEFT, "Cancel", false);
-		swkbdSetButton(&swkbd, SWKBD_BUTTON_RIGHT, "Create", true);
-		button = swkbdInputText(&swkbd, name, sizeof(name));
-		if(button == SWKBD_BUTTON_RIGHT) {
-			create_folder(string(name));
-			deinit_folders(state); init_folders(state);
+		string name = get_input_name();
+		if(name != "") {
+			create_folder(name);
+			reinit_folders(state);
+		}
+	} else if(down & KEY_Y) {
+		remove_folder(state->folders[current_selection].id);
+		reinit_folders(state);
+	} else if(down & KEY_SELECT) {
+		string name = get_input_name();
+		if(name != "") {
+			rename_folder(state->folders[current_selection].id, name);
+			reinit_folders(state);
 		}
 	}
     return "";
@@ -143,7 +149,7 @@ const char* scene_folder_select_render(AppState* state, C3D_RenderTarget* top, C
 	C2D_TextBufClear(g_dynamicBuf);
 
 	// Draw static text strings
-	C2D_DrawText(&g_staticText, C2D_AlignCenter, 160, 10, 0, .55, .55);
+	C2D_DrawText(&g_staticText, C2D_AlignCenter, 160, 5, 0, .55, .55);
 
 	C2D_DrawRectSolid(5, 45, 0, 310, 60, C2D_Color32(0x00, 0x00, 0x00, 0x9F));
 	C2D_DrawRectSolid(5, 110, 0, 310, 60, C2D_Color32(0x00, 0x00, 0x00, 0x9F));
@@ -154,7 +160,7 @@ const char* scene_folder_select_render(AppState* state, C3D_RenderTarget* top, C
 	if(current_selection == 0) {
 		sel_y = 45;
 		first = 0;
-	} else if(current_selection == (s32)state->folders.size() - 1) {
+	} else if(current_selection == (s32)state->folders.size() - 1 && current_selection >= 2) {
 		sel_y = 175;
 		first = current_selection - 2;
 	} else {
@@ -168,7 +174,7 @@ const char* scene_folder_select_render(AppState* state, C3D_RenderTarget* top, C
 	C2D_DrawLine(313, sel_y + 4, white, 313, sel_y + 56, white, 4, 0);
 
 	// Generate and draw dynamic text
-	for(u32 i = first; i < first + 3; i++) {
+	for(u32 i = first; i < first + 3 && i < state->folders.size(); i++) {
 		C2D_Text dynText;
 		C2D_TextParse(&dynText, g_dynamicBuf, state->folders[i].name.c_str());
 		C2D_TextOptimize(&dynText);

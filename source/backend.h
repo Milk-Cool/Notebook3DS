@@ -51,6 +51,11 @@ string create_folder(string folder_name);
 string create_topic(string folder_id, string topic_name);
 void save_page(string folder_id, string topic_id, Page page);
 
+bool remove_folder(string folder_id);
+bool remove_topic(string folder_id, string topic_id);
+void rename_folder(string folder_id, string new_name);
+void rename_topic(string folder_id, string topic_id, string new_name);
+
 vector<uint8_t> page2bin(Page page); // does not initialize the index
 Page bin2page(vector<uint8_t> bin);
 Page bin2page(uint8_t* bin, size_t size);

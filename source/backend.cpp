@@ -145,6 +145,41 @@ void save_page(string folder_id, string topic_id, Page page) {
     fclose(file);
 }
 
+bool remove_dir_rec(string path) {
+    DIR* dir = opendir(path.c_str());
+    if(!dir) return false;
+    struct dirent* entry;
+    if(path[path.size() - 1] != '/')
+        path.push_back('/');
+    while((entry = readdir(dir)) != NULL) {
+        if(entry->d_type == DT_DIR)
+            if(!remove_dir_rec(path + entry->d_name)) return false;
+        unlink((path + entry->d_name).c_str());
+    }
+    closedir(dir);
+    return true;
+}
+
+bool remove_folder(string folder_id) {
+    return remove_dir_rec(PATH_ROOT + folder_id);
+}
+
+bool remove_topic(string folder_id, string topic_id) {
+    return remove_dir_rec(PATH_ROOT + folder_id + "/" + topic_id);
+}
+
+void rename_folder(string folder_id, string new_name) {
+    FILE* name = fopen((PATH_ROOT + folder_id + "/" + NAMEFILE).c_str(), "w");
+    fwrite(new_name.c_str(), new_name.size(), 1, name);
+    fclose(name);
+}
+
+void rename_topic(string folder_id, string topic_id, string new_name) {
+    FILE* name = fopen((PATH_ROOT + folder_id + "/" + topic_id + "/" + NAMEFILE).c_str(), "w");
+    fwrite(new_name.c_str(), new_name.size(), 1, name);
+    fclose(name);
+}
+
 static ShapeType shape_types[] = {
     ShapeTypeFillRect,
     ShapeTypeHollowRect,
