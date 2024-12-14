@@ -32,7 +32,8 @@ vector<Folder> get_folders() {
 static ShapeType shape_types[] = {
     ShapeTypeFillRect,
     ShapeTypeHollowRect,
-    ShapeTypeLine
+    ShapeTypeLine,
+    ShapeTypeText
 };
 
 static void push_back_bytes(vector<uint8_t>* buf, size_t bytes) {
@@ -70,6 +71,10 @@ vector<uint8_t> page2bin(Page page) {
             push_back_bytes(&out, sizeof(uint16_t));
             write_bytes_to_end(&out, (uint8_t*)&page.shapes[i].points[j].y, sizeof(uint16_t));
         }
+        uint32_t text_len = page.shapes[i].text.size();
+        push_back_bytes(&out, text_len);
+        write_bytes_to_end(&out, (uint8_t*)page.shapes[i].text.c_str(), text_len);
+        out.push_back(0);
     }
     return out;
 }
@@ -84,8 +89,13 @@ Page bin2page(vector<uint8_t> bin) {
         ind += sizeof(uint8_t);
         shape.color = *(uint32_t*)(bin.data() + ind); // u32
         ind += sizeof(uint32_t);
-        shape.thickness = *(uint32_t*)(bin.data() + ind); // u32
-        shape.thickness /= 1000;
+        uint32_t thickness_u32;
+        // CRUTCH: doesn't work without memcpy, probably because it's copied to a float in the end.
+        // God, I hate ARM.
+        memcpy(&thickness_u32, bin.data() + ind, sizeof(uint32_t));
+        float thickness_fl = thickness_u32;
+        thickness_fl /= 1000.0f;
+        shape.thickness = thickness_fl;
         ind += sizeof(uint32_t);
         uint32_t points_len = *(uint32_t*)(bin.data() + ind);
         ind += sizeof(uint32_t);
@@ -96,6 +106,11 @@ Page bin2page(vector<uint8_t> bin) {
             point.y = *(uint16_t*)(bin.data() + ind);
             ind += sizeof(uint16_t);
             shape.points.push_back(point);
+        }
+        while(true) {
+            char c = bin[ind++];
+            if(c == '\0') break;
+            shape.text.push_back(c);
         }
         out.shapes.push_back(shape);
     }

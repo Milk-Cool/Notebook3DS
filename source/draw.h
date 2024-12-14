@@ -8,4 +8,6 @@ extern "C" {
 }
 #include "backend.h"
 
+void draw_init();
+void draw_deinit();
 void draw_shape(C3D_RenderTarget* top, Shape shape);

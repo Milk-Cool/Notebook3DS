@@ -7,6 +7,7 @@ extern "C" {
 }
 #include "backend.h"
 #include "app_state.h"
+#include "draw.h"
 #include <stack>
 
 // Scenes
@@ -68,6 +69,7 @@ int main()
 	// Initialize the libs
 	init();
 	init_backend();
+	draw_init();
 
 	// Create screen
 	C3D_RenderTarget* top = C2D_CreateScreenTarget(GFX_TOP, GFX_LEFT);
@@ -114,5 +116,6 @@ int main()
 
 	// Deinitialize the libs
 	deinit();
+	draw_deinit();
 	return 0;
 }

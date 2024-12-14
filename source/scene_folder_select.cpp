@@ -7,7 +7,7 @@ const char* scene_folder_select_name = "folder_select";
 static float textSize = 0.5f;
 
 static C2D_TextBuf g_staticBuf, g_dynamicBuf;
-static C2D_Text g_staticText[4];
+static C2D_Text g_staticText;
 
 static Page new_page;
 
@@ -17,39 +17,55 @@ bool scene_folder_select_init(AppState* state) {
 	g_staticBuf  = C2D_TextBufNew(4096); // support up to 4096 glyphs in the buffer
 	g_dynamicBuf = C2D_TextBufNew(4096);
 
+	state->folders = get_folders();
+
 	string str = "";
 	Page test_page;
 
 	Shape shape1;
-	shape1.color = 0xffff00ff;
+	shape1.color = C2D_Color32(255, 255, 0, 255);
 	shape1.type = ShapeTypeLine;
 	shape1.thickness = 2;
+	shape1.text = "";
 	shape1.points.push_back((Point){ .x = 30, .y = 50 });
 	shape1.points.push_back((Point){ .x = 130, .y = 150 });
 	shape1.points.push_back((Point){ .x = 200, .y = 30 });
 	test_page.shapes.push_back(shape1);
 
-	// Shape shape2;
-	// shape2.color = 0xff00ffff;
-	// shape2.type = ShapeTypeFillRect;
-	// shape2.thickness = .5;
-	// shape2.points.push_back((Point){ .x = 70, .y = 90 });
-	// shape2.points.push_back((Point){ .x = 170, .y = 190 });
-	// test_page.shapes.push_back(shape2);
+	Shape shape2;
+	shape2.color = C2D_Color32(255, 0, 255, 255);
+	shape2.type = ShapeTypeFillRect;
+	shape2.thickness = .5;
+	shape2.text = "";
+	shape2.points.push_back((Point){ .x = 70, .y = 90 });
+	shape2.points.push_back((Point){ .x = 170, .y = 190 });
+	test_page.shapes.push_back(shape2);
 
 	Shape shape3;
-	shape3.color = 0xff0000ff;
+	shape3.color = C2D_Color32(255, 0, 255, 255);
 	shape3.type = ShapeTypeHollowRect;
 	shape3.thickness = 7;
+	shape3.text = "";
 	shape3.points.push_back((Point){ .x = 90, .y = 110 });
 	shape3.points.push_back((Point){ .x = 190, .y = 210 });
 	test_page.shapes.push_back(shape3);
+
+	Shape shape4;
+	shape4.color = C2D_Color32(0, 255, 32, 255);
+	shape4.type = ShapeTypeText;
+	shape4.thickness = .5;
+	shape4.text = "Hello, world!";
+	shape4.points.push_back((Point){ .x = 200, .y = 100 });
+	test_page.shapes.push_back(shape4);
 
 	// vector<Folder> folders = get_folders();
 	// for(Folder folder : folders) {
 	// 	str += folder.name + "\n";
 	// }
 	vector<uint8_t> buf = page2bin(test_page);
+	FILE* f = fopen("/debug.bin", "w");
+	fwrite(buf.data(), 1, buf.size(), f);
+	fclose(f);
 	new_page = bin2page(buf);
 
 	for(uint8_t i = 0; i < new_page.shapes.size(); i++) {
@@ -64,6 +80,9 @@ bool scene_folder_select_init(AppState* state) {
 			case ShapeTypeLine:
 				str += "line ";
 				break;
+			case ShapeTypeText:
+				str += "text ";
+				break;
 		}
 		str += to_string(cur.color) + " ";
 		str += to_string(cur.thickness) + " ";
@@ -73,16 +92,10 @@ bool scene_folder_select_init(AppState* state) {
 	}
 
 	// Parse the static text strings
-	C2D_TextParse(&g_staticText[0], g_staticBuf, str.c_str());
-	C2D_TextParse(&g_staticText[1], g_staticBuf, "I am red skinny text!");
-	C2D_TextParse(&g_staticText[2], g_staticBuf, "I am blue fat text!");
-	C2D_TextParse(&g_staticText[3], g_staticBuf, "I am justified text!");
+	C2D_TextParse(&g_staticText, g_staticBuf, str.c_str());
 
 	// Optimize the static text strings
-	C2D_TextOptimize(&g_staticText[0]);
-	C2D_TextOptimize(&g_staticText[1]);
-	C2D_TextOptimize(&g_staticText[2]);
-	C2D_TextOptimize(&g_staticText[3]);
+	C2D_TextOptimize(&g_staticText);
     return true;
 }
 const char* scene_folder_select_input(AppState* state, u32 down, u32 held) {
@@ -112,10 +125,7 @@ const char* scene_folder_select_render(AppState* state, C3D_RenderTarget* top) {
 	C2D_TextBufClear(g_dynamicBuf);
 
 	// Draw static text strings
-	C2D_DrawText(&g_staticText[0], 0, 8.0f, 8.0f, 0.5f, textSize, textSize);
-	C2D_DrawText(&g_staticText[1], C2D_AtBaseline | C2D_WithColor, 16.0f, 210.0f, 0.5f, 0.5f, 0.75f, C2D_Color32f(1.0f,0.0f,0.0f,1.0f));
-	C2D_DrawText(&g_staticText[2], C2D_AtBaseline | C2D_WithColor | C2D_AlignRight, 384.0f, 210.0f, 0.5f, 0.75f, 0.5f, C2D_Color32f(0.0f,0.0f,1.0f,0.625f));
-	C2D_DrawText(&g_staticText[3], C2D_AtBaseline | C2D_AlignJustified | C2D_WordWrap, 100.0f, 170.0f, 0.5f, 0.75f, 0.75f, 200.0f);
+	C2D_DrawText(&g_staticText, 0, 8.0f, 8.0f, 0, textSize, textSize);
 
 	// Generate and draw dynamic text
 	char buf[160];
@@ -123,7 +133,7 @@ const char* scene_folder_select_render(AppState* state, C3D_RenderTarget* top) {
 	snprintf(buf, sizeof(buf), "Current text size: %f (Use  to change)", textSize);
 	C2D_TextParse(&dynText, g_dynamicBuf, buf);
 	C2D_TextOptimize(&dynText);
-	C2D_DrawText(&dynText, C2D_AlignCenter, 200.0f, 220.0f, 0.5f, 0.5f, 0.5f);
+	C2D_DrawText(&dynText, C2D_AlignCenter, 200.0f, 220.0f, 0, 0.5f, 0.5f);
 
 	for(uint8_t i = 0; i < new_page.shapes.size(); i++) {
 		draw_shape(top, new_page.shapes[i]);

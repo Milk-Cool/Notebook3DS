@@ -20,13 +20,15 @@ typedef struct {
 typedef enum {
     ShapeTypeFillRect,
     ShapeTypeHollowRect,
-    ShapeTypeLine
+    ShapeTypeLine,
+    ShapeTypeText
 } ShapeType;
 typedef struct {
     ShapeType type;
     uint32_t color;
     float thickness;
     vector<Point> points;
+    string text;
 } Shape;
 typedef struct {
     uint32_t index;
