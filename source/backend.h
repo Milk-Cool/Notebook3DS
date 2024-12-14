@@ -1,6 +1,11 @@
 #pragma once
 #include <list>
 #include <string>
+#include <cstring>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <sys/dirent.h>
 using namespace std;
 
 typedef struct {
@@ -29,3 +34,9 @@ typedef struct {
 	string id;
 	string name;
 } Topic;
+
+#define PATH_ROOT "/notebook/"
+#define NAMEFILE ".notebook"
+
+void init_backend();
+list<Folder> get_folders();

@@ -1,18 +1,9 @@
 #include "scene_folder_select.h"
+#include "backend.h"
 
 const char* scene_folder_select_name = "folder_select";
 
 static float textSize = 0.5f;
-
-static const char teststring[] =
-	"Hello World - now with citro2d!\n"
-	"The quick brown fox jumps over the lazy dog.\n"
-	"\n"
-	"En français: Vous ne devez pas éteindre votre console.\n"
-	"日本語文章を見せるのも出来ますよ。\n"
-	"Un poco de texto en español nunca queda mal.\n"
-	"Πού είναι η τουαλέτα;\n"
-	"Я очень рад, ведь я, наконец, возвращаюсь домой\n";
 
 static C2D_TextBuf g_staticBuf, g_dynamicBuf;
 static C2D_Text g_staticText[4];
@@ -23,8 +14,14 @@ bool scene_folder_select_init(AppState* state) {
 	g_staticBuf  = C2D_TextBufNew(4096); // support up to 4096 glyphs in the buffer
 	g_dynamicBuf = C2D_TextBufNew(4096);
 
+	string str = "";
+	list<Folder> folders = get_folders();
+	for(Folder folder : folders) {
+		str += folder.name + "\n";
+	}
+
 	// Parse the static text strings
-	C2D_TextParse(&g_staticText[0], g_staticBuf, teststring);
+	C2D_TextParse(&g_staticText[0], g_staticBuf, str.c_str());
 	C2D_TextParse(&g_staticText[1], g_staticBuf, "I am red skinny text!");
 	C2D_TextParse(&g_staticText[2], g_staticBuf, "I am blue fat text!");
 	C2D_TextParse(&g_staticText[3], g_staticBuf, "I am justified text!");

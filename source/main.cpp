@@ -67,6 +67,7 @@ int main()
 {
 	// Initialize the libs
 	init();
+	init_backend();
 
 	// Create screen
 	C3D_RenderTarget* top = C2D_CreateScreenTarget(GFX_TOP, GFX_LEFT);
