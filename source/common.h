@@ -10,3 +10,4 @@ extern "C" {
 using namespace std;
 
 string get_input_name();
+extern u32 accent_bg;

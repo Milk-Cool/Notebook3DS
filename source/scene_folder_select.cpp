@@ -145,7 +145,7 @@ const char* scene_folder_select_input(AppState* state, u32 down, u32 held) {
 const char* scene_folder_select_render(AppState* state, C3D_RenderTarget* top, C3D_RenderTarget* bottom) {
 	// BOTTOM
     C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
-    C2D_TargetClear(bottom, C2D_Color32(245, 162, 206, 0xFF)); // TODO: make color const
+    C2D_TargetClear(bottom, accent_bg); // TODO: make color const
     C2D_SceneBegin(bottom);
 	// Clear the dynamic text buffer
 	C2D_TextBufClear(g_dynamicBuf);
@@ -191,7 +191,7 @@ const char* scene_folder_select_render(AppState* state, C3D_RenderTarget* top, C
 
 	// TOP
     C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
-    C2D_TargetClear(top, C2D_Color32(245, 162, 206, 0xFF));
+    C2D_TargetClear(top, accent_bg);
     C2D_SceneBegin(top);
 
 	C2D_DrawText(&g_staticTitle, C2D_AlignCenter, 200, 100, 0, .8, .8);

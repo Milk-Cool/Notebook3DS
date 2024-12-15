@@ -13,3 +13,5 @@ string get_input_name() {
         return string(name);
     return "";
 }
+
+u32 accent_bg = C2D_Color32(245, 162, 206, 0xFF);
