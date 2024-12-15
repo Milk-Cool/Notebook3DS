@@ -1,7 +1,7 @@
 #include "scene_folder_select.h"
 #include "backend.h"
-#include "draw.h"
 #include "common.h"
+#include "scene_topic_select.h"
 
 const char* scene_folder_select_name = "folder_select";
 
@@ -116,28 +116,33 @@ const char* scene_folder_select_input(AppState* state, u32 down, u32 held) {
         return nullptr;
 	}
 
-	if(down & KEY_DOWN) {
-		current_selection++;
-		if(current_selection == (s32)state->folders.size()) current_selection = 0;
-	} else if(down & KEY_UP) {
-		current_selection--;
-		if(current_selection == -1) current_selection = state->folders.size() - 1;
-	}
-
-	if(down & KEY_X) {
-		string name = get_input_name();
-		if(name != "") {
-			create_folder(name);
-			reinit_folders(state);
+	if(state->folders.size() != 0) {
+		if(down & KEY_DOWN) {
+			current_selection++;
+			if(current_selection == (s32)state->folders.size()) current_selection = 0;
+		} else if(down & KEY_UP) {
+			current_selection--;
+			if(current_selection == -1) current_selection = state->folders.size() - 1;
 		}
-	} else if(down & KEY_Y) {
-		remove_folder(state->folders[current_selection].id);
-		reinit_folders(state);
-	} else if(down & KEY_SELECT) {
-		string name = get_input_name();
-		if(name != "") {
-			rename_folder(state->folders[current_selection].id, name);
+
+		if(down & KEY_A) {
+			state->current_folder_index = current_selection;
+			return scene_topic_select_name;
+		} else if(down & KEY_X) {
+			string name = get_input_name();
+			if(name != "") {
+				create_folder(name);
+				reinit_folders(state);
+			}
+		} else if(down & KEY_Y) {
+			remove_folder(state->folders[current_selection].id);
 			reinit_folders(state);
+		} else if(down & KEY_SELECT) {
+			string name = get_input_name();
+			if(name != "") {
+				rename_folder(state->folders[current_selection].id, name);
+				reinit_folders(state);
+			}
 		}
 	}
     return "";
@@ -157,30 +162,32 @@ const char* scene_folder_select_render(AppState* state, C3D_RenderTarget* top, C
 	C2D_DrawRectSolid(5, 110, 0, 310, 60, C2D_Color32(0x00, 0x00, 0x00, 0x9F));
 	C2D_DrawRectSolid(5, 175, 0, 310, 60, C2D_Color32(0x00, 0x00, 0x00, 0x9F));
 
-	u8 sel_y;
-	u32 first;
-	if(current_selection == 0) {
-		sel_y = 45;
-		first = 0;
-	} else if(current_selection == (s32)state->folders.size() - 1 && current_selection >= 2) {
-		sel_y = 175;
-		first = current_selection - 2;
-	} else {
-		sel_y = 110;
-		first = current_selection - 1;
-	}
-	u32 white = C2D_Color32(0xff, 0xff, 0xff, 0xff);
-	C2D_DrawLine(5, sel_y + 2, white, 315, sel_y + 2, white, 4, 0);
-	C2D_DrawLine(5, sel_y + 58, white, 315, sel_y + 58, white, 4, 0);
-	C2D_DrawLine(7, sel_y + 4, white, 7, sel_y + 56, white, 4, 0);
-	C2D_DrawLine(313, sel_y + 4, white, 313, sel_y + 56, white, 4, 0);
+	if(state->folders.size() != 0) {
+		u8 sel_y;
+		u32 first;
+		if(current_selection == 0) {
+			sel_y = 45;
+			first = 0;
+		} else if(current_selection == (s32)state->folders.size() - 1 && current_selection >= 2) {
+			sel_y = 175;
+			first = current_selection - 2;
+		} else {
+			sel_y = 110;
+			first = current_selection - 1;
+		}
+		u32 white = C2D_Color32(0xff, 0xff, 0xff, 0xff);
+		C2D_DrawLine(5, sel_y + 2, white, 315, sel_y + 2, white, 4, 0);
+		C2D_DrawLine(5, sel_y + 58, white, 315, sel_y + 58, white, 4, 0);
+		C2D_DrawLine(7, sel_y + 4, white, 7, sel_y + 56, white, 4, 0);
+		C2D_DrawLine(313, sel_y + 4, white, 313, sel_y + 56, white, 4, 0);
 
-	// Generate and draw dynamic text
-	for(u32 i = first; i < first + 3 && i < state->folders.size(); i++) {
-		C2D_Text dynText;
-		C2D_TextParse(&dynText, g_dynamicBuf, state->folders[i].name.c_str());
-		C2D_TextOptimize(&dynText);
-		C2D_DrawText(&dynText, C2D_AlignCenter | C2D_WithColor, 160, 65 + 65 * (i - first), 0, 0.5f, 0.5f, white);
+		// Generate and draw dynamic text
+		for(u32 i = first; i < first + 3 && i < state->folders.size(); i++) {
+			C2D_Text dynText;
+			C2D_TextParse(&dynText, g_dynamicBuf, state->folders[i].name.c_str());
+			C2D_TextOptimize(&dynText);
+			C2D_DrawText(&dynText, C2D_AlignCenter | C2D_WithColor, 160, 65 + 65 * (i - first), 0, 0.5f, 0.5f, white);
+		}
 	}
 
 	// for(uint8_t i = 0; i < new_page.shapes.size(); i++) {

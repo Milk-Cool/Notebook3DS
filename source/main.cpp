@@ -12,6 +12,7 @@ extern "C" {
 
 // Scenes
 #include "scene_folder_select.h"
+#include "scene_topic_select.h"
 
 using namespace std;
 
@@ -38,6 +39,13 @@ Scene scenes[] = {
 		.input = scene_folder_select_input,
 		.render = scene_folder_select_render,
 		.deinit = scene_folder_select_deinit
+	},
+	{
+		.name = scene_topic_select_name,
+		.init = scene_topic_select_init,
+		.input = scene_topic_select_input,
+		.render = scene_topic_select_render,
+		.deinit = scene_topic_select_deinit
 	}
 };
 
@@ -62,6 +70,11 @@ void push_scene(const char* scene_name) {
 		}
 	if(ind == UINT32_MAX) return;
 	scene_stack.push(ind);
+}
+
+void init_new_scene() {
+	u32 new_scene = scene_stack.top();
+	scenes[new_scene].init(&state);
 }
 
 int main()
@@ -99,6 +112,7 @@ int main()
 			continue;
 		} else if(strcmp(res_input, "")) {
 			push_scene(res_input);
+			init_new_scene();
 			continue;
 		}
 
@@ -111,6 +125,7 @@ int main()
 			continue;
 		} else if(strcmp(res_input, "")) {
 			push_scene(res_render);
+			init_new_scene();
 			continue;
 		}
 	}
