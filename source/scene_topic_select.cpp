@@ -42,6 +42,7 @@ const char* scene_topic_select_input(AppState* state, u32 down, u32 held) {
         return nullptr;
 	}
 
+	string current_folder_id = state->folders[state->current_folder_index].id;
 	if(state->current_topics.size() != 0) {
 		if(down & KEY_DOWN) {
 			current_selection++;
@@ -49,23 +50,22 @@ const char* scene_topic_select_input(AppState* state, u32 down, u32 held) {
 		} else if(down & KEY_UP) {
 			current_selection--;
 			if(current_selection == -1) current_selection = state->current_topics.size() - 1;
+		} else if(down & KEY_Y) {
+			remove_topic(current_folder_id, state->current_topics[current_selection].id);
+			reinit_topics(state);
+		} else if(down & KEY_SELECT) {
+			string name = get_input_name();
+			if(name != "") {
+				rename_topic(current_folder_id, state->current_topics[current_selection].id, name);
+				reinit_topics(state);
+			}
 		}
 	}
 
-	string current_folder_id = state->folders[state->current_folder_index].id;
 	if(down & KEY_X) {
 		string name = get_input_name();
 		if(name != "") {
 			create_topic(current_folder_id, name);
-			reinit_topics(state);
-		}
-	} else if(down & KEY_Y) {
-		remove_topic(current_folder_id, state->current_topics[current_selection].id);
-		reinit_topics(state);
-	} else if(down & KEY_SELECT) {
-		string name = get_input_name();
-		if(name != "") {
-			rename_topic(current_folder_id, state->current_topics[current_selection].id, name);
 			reinit_topics(state);
 		}
 	}

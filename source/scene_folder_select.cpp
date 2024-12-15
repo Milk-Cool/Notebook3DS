@@ -2,6 +2,7 @@
 #include "backend.h"
 #include "common.h"
 #include "scene_topic_select.h"
+#include "scene_folder_delete.h"
 
 const char* scene_folder_select_name = "folder_select";
 
@@ -112,8 +113,21 @@ bool scene_folder_select_init(AppState* state) {
     return true;
 }
 const char* scene_folder_select_input(AppState* state, u32 down, u32 held) {
+	// input events come before rendering
+	if(state->needs_reinit) {
+		reinit_folders(state);
+		state->needs_reinit = false;
+	}
+
     if (down & KEY_START) {
         return nullptr;
+	}
+	if(down & KEY_X) {
+		string name = get_input_name();
+		if(name != "") {
+			create_folder(name);
+			reinit_folders(state);
+		}
 	}
 
 	if(state->folders.size() != 0) {
@@ -128,15 +142,9 @@ const char* scene_folder_select_input(AppState* state, u32 down, u32 held) {
 		if(down & KEY_A) {
 			state->current_folder_index = current_selection;
 			return scene_topic_select_name;
-		} else if(down & KEY_X) {
-			string name = get_input_name();
-			if(name != "") {
-				create_folder(name);
-				reinit_folders(state);
-			}
 		} else if(down & KEY_Y) {
-			remove_folder(state->folders[current_selection].id);
-			reinit_folders(state);
+			state->current_folder_index = current_selection;
+			return scene_folder_delete_name;
 		} else if(down & KEY_SELECT) {
 			string name = get_input_name();
 			if(name != "") {

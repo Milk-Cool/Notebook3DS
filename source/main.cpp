@@ -12,6 +12,7 @@ extern "C" {
 
 // Scenes
 #include "scene_folder_select.h"
+#include "scene_folder_delete.h"
 #include "scene_topic_select.h"
 
 using namespace std;
@@ -46,7 +47,14 @@ Scene scenes[] = {
 		.input = scene_topic_select_input,
 		.render = scene_topic_select_render,
 		.deinit = scene_topic_select_deinit
-	}
+	},
+	{
+		.name = scene_folder_delete_name,
+		.init = scene_folder_delete_init,
+		.input = scene_folder_delete_input,
+		.render = scene_folder_delete_render,
+		.deinit = scene_folder_delete_deinit
+	},
 };
 
 void init() {
@@ -83,6 +91,8 @@ int main()
 	init();
 	init_backend();
 	draw_init();
+
+	state.needs_reinit = false;
 
 	// Create screen
 	C3D_RenderTarget* top = C2D_CreateScreenTarget(GFX_TOP, GFX_LEFT);

@@ -9,4 +9,6 @@ typedef struct {
 	uint32_t current_topic_index;
 	vector<Page> current_pages;
 	uint32_t current_page_index;
+
+	bool needs_reinit;
 } AppState;
