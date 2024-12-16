@@ -2,6 +2,7 @@
 #include "backend.h"
 #include "common.h"
 #include "scene_topic_delete.h"
+#include "scene_page.h"
 
 const char* scene_topic_select_name = "topic_select";
 
@@ -51,7 +52,15 @@ const char* scene_topic_select_input(AppState* state, u32 down, u32 held) {
 
 	string current_folder_id = state->folders[state->current_folder_index].id;
 	if(state->current_topics.size() != 0) {
-		if(down & KEY_DOWN) {
+		if(down & KEY_A) {
+			state->current_topic_index = current_selection;
+			// we do not load pages in scene_page but rather here
+			state->current_pages = get_pages(
+				state->folders[state->current_folder_index].id,
+				state->current_topics[state->current_topic_index].id
+			);
+			return scene_page_name;
+		} else if(down & KEY_DOWN) {
 			current_selection++;
 			if(current_selection == (s32)state->current_topics.size()) current_selection = 0;
 		} else if(down & KEY_UP) {

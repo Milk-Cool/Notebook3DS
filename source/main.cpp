@@ -15,6 +15,8 @@ extern "C" {
 #include "scene_folder_delete.h"
 #include "scene_topic_select.h"
 #include "scene_topic_delete.h"
+#include "scene_page.h"
+#include "scene_help.h"
 
 using namespace std;
 
@@ -62,6 +64,20 @@ Scene scenes[] = {
 		.input = scene_topic_delete_input,
 		.render = scene_topic_delete_render,
 		.deinit = scene_topic_delete_deinit
+	},
+	{
+		.name = scene_page_name,
+		.init = scene_page_init,
+		.input = scene_page_input,
+		.render = scene_page_render,
+		.deinit = scene_page_deinit
+	},
+	{
+		.name = scene_help_name,
+		.init = scene_help_init,
+		.input = scene_help_input,
+		.render = scene_help_render,
+		.deinit = scene_help_deinit
 	},
 };
 
