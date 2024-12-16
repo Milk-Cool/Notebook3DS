@@ -157,6 +157,7 @@ bool remove_dir_rec(string path) {
         unlink((path + entry->d_name).c_str());
     }
     closedir(dir);
+    rmdir(path.c_str());
     return true;
 }
 
