@@ -50,8 +50,17 @@ static void handle_input(AppState* state, u32 down, u32 held, Page* current_page
 const char* scene_page_input(AppState* state, u32 down, u32 held) {
     if(down & KEY_Y)
         return scene_help_name;
-    else if(down & KEY_START)
+    else if(down & KEY_START) {
+        for(uint32_t i = state->current_pages.size() - 1; i >= 0; i--) {
+            if(state->current_pages[i].shapes.size() > 0) {
+                state->current_pages.resize(i + 1);
+                break;
+            }
+        }
+        for(Page page : state->current_pages)
+            save_page(state->folders[state->current_folder_index].id, state->current_topics[state->current_topic_index].id, page);
         return nullptr;
+    }
 
     if(held & KEY_DDOWN) {
         state->dstate.scroll += scroll_add;
