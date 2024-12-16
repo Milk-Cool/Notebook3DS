@@ -14,8 +14,8 @@ typedef struct {
 	string name;
 } Folder;
 typedef struct {
-    uint16_t x;
-    uint16_t y;
+    int32_t x;
+    int32_t y;
 } Point;
 typedef enum {
     ShapeTypeFillRect,

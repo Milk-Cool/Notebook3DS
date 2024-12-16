@@ -10,4 +10,5 @@ extern "C" {
 
 void draw_init();
 void draw_deinit();
-void draw_shape(C3D_RenderTarget* top, Shape shape);
+void draw_shape(Shape shape, uint32_t scroll);
+void draw_shape_top(Shape shape, uint32_t scroll);

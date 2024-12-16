@@ -30,79 +30,6 @@ bool scene_folder_select_init(AppState* state) {
 
 	init_folders(state);
 
-	// string str = "";
-	// Page test_page;
-
-	// Shape shape1;
-	// shape1.color = C2D_Color32(255, 255, 0, 255);
-	// shape1.type = ShapeTypeLine;
-	// shape1.thickness = 2;
-	// shape1.text = "";
-	// shape1.points.push_back((Point){ .x = 30, .y = 50 });
-	// shape1.points.push_back((Point){ .x = 130, .y = 150 });
-	// shape1.points.push_back((Point){ .x = 200, .y = 30 });
-	// test_page.shapes.push_back(shape1);
-
-	// Shape shape2;
-	// shape2.color = C2D_Color32(255, 0, 255, 255);
-	// shape2.type = ShapeTypeFillRect;
-	// shape2.thickness = .5;
-	// shape2.text = "";
-	// shape2.points.push_back((Point){ .x = 70, .y = 90 });
-	// shape2.points.push_back((Point){ .x = 170, .y = 190 });
-	// test_page.shapes.push_back(shape2);
-
-	// Shape shape3;
-	// shape3.color = C2D_Color32(255, 0, 255, 255);
-	// shape3.type = ShapeTypeHollowRect;
-	// shape3.thickness = 7;
-	// shape3.text = "";
-	// shape3.points.push_back((Point){ .x = 90, .y = 110 });
-	// shape3.points.push_back((Point){ .x = 190, .y = 210 });
-	// test_page.shapes.push_back(shape3);
-
-	// Shape shape4;
-	// shape4.color = C2D_Color32(0, 255, 32, 255);
-	// shape4.type = ShapeTypeText;
-	// shape4.thickness = .5;
-	// shape4.text = "Hello, world!";
-	// shape4.points.push_back((Point){ .x = 200, .y = 100 });
-	// test_page.shapes.push_back(shape4);
-
-	// // vector<Folder> folders = get_folders();
-	// // for(Folder folder : folders) {
-	// // 	str += folder.name + "\n";
-	// // }
-	// vector<uint8_t> buf = page2bin(test_page);
-	// FILE* f = fopen("/debug.bin", "w");
-	// fwrite(buf.data(), 1, buf.size(), f);
-	// fclose(f);
-	// new_page = bin2page(buf);
-	// new_page.index = 0;
-
-	// for(uint8_t i = 0; i < new_page.shapes.size(); i++) {
-	// 	Shape cur = new_page.shapes[i];
-	// 	switch(cur.type) {
-	// 		case ShapeTypeFillRect:
-	// 			str += "fillrect ";
-	// 			break;
-	// 		case ShapeTypeHollowRect:
-	// 			str += "hollowrect ";
-	// 			break;
-	// 		case ShapeTypeLine:
-	// 			str += "line ";
-	// 			break;
-	// 		case ShapeTypeText:
-	// 			str += "text ";
-	// 			break;
-	// 	}
-	// 	str += to_string(cur.color) + " ";
-	// 	str += to_string(cur.thickness) + " ";
-	// 	for(uint8_t j = 0; j < cur.points.size(); j++)
-	// 		str += to_string(cur.points[j].x) + " " + to_string(cur.points[j].y) + " ";
-	// 	str += ";\n";
-	// }
-
 	// // Parse the static text strings
 	C2D_TextParse(&g_staticText, g_staticBuf, "Select folder or press  to create a new one\nPress  to remove, or SELECT to rename");
 	C2D_TextParse(&g_staticTitle, g_staticBuf, "Notebook3DS");
@@ -197,10 +124,6 @@ const char* scene_folder_select_render(AppState* state, C3D_RenderTarget* top, C
 			C2D_DrawText(&dynText, C2D_AlignCenter | C2D_WithColor, 160, 65 + 65 * (i - first), 0, 0.5f, 0.5f, white);
 		}
 	}
-
-	// for(uint8_t i = 0; i < new_page.shapes.size(); i++) {
-	// 	draw_shape(top, new_page.shapes[i]);
-	// }
 
     C3D_FrameEnd(0);
 

@@ -16,4 +16,5 @@ typedef struct {
 
     uint64_t last_point_time;
     bool last_touched;
+    int32_t scroll;
 } DrawingState;
