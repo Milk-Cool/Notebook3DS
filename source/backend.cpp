@@ -64,15 +64,15 @@ vector<Page> get_pages(string folder_id, string topic_id) {
     while((entry = readdir(dir)) != NULL) {
         if(entry->d_type != DT_REG) continue;
         if(!strcmp(entry->d_name, NAMEFILE)) continue;
-        char path[256];
-        sniprintf(path, 256, "%s%s", topic_path, entry->d_name);
+        char path[512];
+        sniprintf(path, 512, "%s%s", topic_path, entry->d_name);
         FILE* file = fopen(path, "r");
         if(file == nullptr) continue;
         fseek(file, 0, SEEK_END);
         size_t size = ftell(file);
         fseek(file, 0, SEEK_SET);
         uint8_t buf[size];
-        fgets((char*)buf, size, file);
+        fread(buf, size, 1, file);
         fclose(file);
         Page page = bin2page(buf, size);
         page.index = stoul(entry->d_name);
