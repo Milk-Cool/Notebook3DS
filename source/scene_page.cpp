@@ -1,6 +1,7 @@
 #include "scene_page.h"
 #include "common.h"
 #include "scene_help.h"
+#include "draw.h"
 
 const char* scene_page_name = "page";
 
@@ -13,13 +14,52 @@ bool scene_page_init(AppState* state) {
 
 	C2D_TextParse(&g_staticText, g_staticBuf, " - help");
 	C2D_TextOptimize(&g_staticText);
+
+    state->dstate.current_tool = ToolFree;
+    state->dstate.current_color = C2D_Color32(0x00, 0x00, 0x00, 0xff);
+    state->dstate.current_thickness = 3;
+    state->dstate.last_point_time = 0;
+    state->dstate.last_touched = false;
+
+    state->current_page_index = 0;
+    if(state->current_pages.size() == 0)
+        state->current_pages.push_back((Page){ .index = 0 });
+
     return true;
+}
+static void handle_input(AppState* state, u32 down, u32 held, Page* current_page, touchPosition touch, u64 curtime) {
+    if(state->dstate.current_tool == ToolFree
+            && curtime - state->dstate.last_point_time > 10) {
+        if(!state->dstate.last_touched)
+            current_page->shapes.push_back((Shape){
+                .type = ShapeTypeLine,
+                .color = state->dstate.current_color,
+                .thickness = state->dstate.current_thickness
+            });
+        current_page->shapes.back().points.push_back((Point){
+            .x = touch.px,
+            .y = touch.py
+        });
+        state->dstate.last_point_time = curtime;
+    }
+    state->dstate.last_touched = true;
 }
 const char* scene_page_input(AppState* state, u32 down, u32 held) {
     if(down & KEY_Y)
         return scene_help_name;
     else if(down & KEY_START)
         return nullptr;
+
+    touchPosition touch;
+    hidTouchRead(&touch);
+
+    Page* current_page = &state->current_pages[state->current_page_index];
+    u64 curtime = osGetTime();
+
+    if(held & KEY_TOUCH)
+        handle_input(state, down, held, current_page, touch, curtime);
+    else
+        state->dstate.last_touched = false;
     
     return "";
 }
@@ -28,6 +68,10 @@ const char* scene_page_render(AppState* state, C3D_RenderTarget* top, C3D_Render
     C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
     C2D_TargetClear(bottom, C2D_Color32(0xff, 0xff, 0xff, 0xff));
     C2D_SceneBegin(bottom);
+
+    Page* current_page = &state->current_pages[state->current_page_index];
+    for(Shape shape : current_page->shapes)
+        draw_shape(bottom, shape);
 
     C3D_FrameEnd(0);
 

@@ -1,5 +1,6 @@
 #pragma once
 #include "backend.h"
+#include "drawing_state.h"
 
 typedef struct {
 	vector<Folder> folders;
@@ -11,4 +12,6 @@ typedef struct {
 	uint32_t current_page_index;
 
 	bool needs_reinit;
+
+	DrawingState dstate;
 } AppState;
