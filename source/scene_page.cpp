@@ -5,14 +5,14 @@
 
 const char* scene_page_name = "page";
 
-static C2D_TextBuf g_staticBuf;
+static C2D_TextBuf g_staticBuf, g_dynamicBuf;
 static C2D_Text g_staticText;
 
 static uint32_t scroll_add = 5;
 
 bool scene_page_init(AppState* state) {
     g_staticBuf  = C2D_TextBufNew(4096);
-	// g_dynamicBuf = C2D_TextBufNew(4096);
+	g_dynamicBuf = C2D_TextBufNew(4096);
 
 	C2D_TextParse(&g_staticText, g_staticBuf, " - help");
 	C2D_TextOptimize(&g_staticText);
@@ -62,6 +62,14 @@ const char* scene_page_input(AppState* state, u32 down, u32 held) {
         if(state->dstate.scroll < 0)
             state->dstate.scroll = 0;
     }
+    if(down & KEY_DRIGHT) {
+        state->current_page_index++;
+        if(state->current_pages.size() == state->current_page_index)
+            state->current_pages.push_back((Page){ .index = 0 });
+    } else if(down & KEY_DLEFT) {
+        if(state->current_page_index > 0)
+            state->current_page_index--;
+    }
 
     touchPosition touch;
     hidTouchRead(&touch);
@@ -103,6 +111,11 @@ const char* scene_page_render(AppState* state, C3D_RenderTarget* top, C3D_Render
     for(Shape shape : current_page->shapes) {
         draw_shape_top(shape, state->dstate.scroll);
     }
+	C2D_TextBufClear(g_dynamicBuf);
+    C2D_Text dynText;
+    C2D_TextParse(&dynText, g_dynamicBuf, ("Page " + to_string(state->current_page_index + 1)).c_str());
+    C2D_TextOptimize(&dynText);
+    C2D_DrawText(&dynText, C2D_AlignCenter, 200, 225, 0, .4, .4);
 	// Draw static text strings
 	C2D_DrawText(&g_staticText, C2D_AlignCenter, 200, 5, 0, .4, .4);
 
@@ -113,4 +126,5 @@ const char* scene_page_render(AppState* state, C3D_RenderTarget* top, C3D_Render
 void scene_page_deinit(AppState* state) {
     // Delete the text buffers
 	C2D_TextBufDelete(g_staticBuf);
+    C2D_TextBufDelete(g_dynamicBuf);
 }
