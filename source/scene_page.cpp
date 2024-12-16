@@ -39,9 +39,12 @@ static void handle_input(AppState* state, u32 down, u32 held, Page* current_page
                 .color = state->dstate.current_color,
                 .thickness = state->dstate.current_thickness
             });
+        uint16_t y = touch.py + (int32_t)state->dstate.scroll;
+        if(y >= PAGE_HEIGHT)
+            y = PAGE_HEIGHT - 1;
         current_page->shapes.back().points.push_back((Point){
             .x = touch.px,
-            .y = touch.py + (int32_t)state->dstate.scroll
+            .y = y
         });
         state->dstate.last_point_time = curtime;
     }
