@@ -65,7 +65,7 @@ const char* scene_page_input(AppState* state, u32 down, u32 held) {
     if(down & KEY_DRIGHT) {
         state->current_page_index++;
         if(state->current_pages.size() == state->current_page_index)
-            state->current_pages.push_back((Page){ .index = 0 });
+            state->current_pages.push_back((Page){ .index = state->current_page_index });
     } else if(down & KEY_DLEFT) {
         if(state->current_page_index > 0)
             state->current_page_index--;
