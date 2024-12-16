@@ -1,6 +1,7 @@
 #include "scene_topic_select.h"
 #include "backend.h"
 #include "common.h"
+#include "scene_topic_delete.h"
 
 const char* scene_topic_select_name = "topic_select";
 
@@ -38,6 +39,12 @@ bool scene_topic_select_init(AppState* state) {
     return true;
 }
 const char* scene_topic_select_input(AppState* state, u32 down, u32 held) {
+	// input events come before rendering
+	if(state->needs_reinit) {
+		reinit_topics(state);
+		state->needs_reinit = false;
+	}
+
     if (down & KEY_START || down & KEY_B) {
         return nullptr;
 	}
@@ -51,8 +58,8 @@ const char* scene_topic_select_input(AppState* state, u32 down, u32 held) {
 			current_selection--;
 			if(current_selection == -1) current_selection = state->current_topics.size() - 1;
 		} else if(down & KEY_Y) {
-			remove_topic(current_folder_id, state->current_topics[current_selection].id);
-			reinit_topics(state);
+			state->current_topic_index = current_selection;
+			return scene_topic_delete_name;
 		} else if(down & KEY_SELECT) {
 			string name = get_input_name();
 			if(name != "") {
