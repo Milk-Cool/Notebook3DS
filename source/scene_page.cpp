@@ -26,7 +26,7 @@ const char* scene_page_input(AppState* state, u32 down, u32 held) {
 const char* scene_page_render(AppState* state, C3D_RenderTarget* top, C3D_RenderTarget* bottom) {
     // BOTTOM
     C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
-    C2D_TargetClear(bottom, C2D_Color32(0xff, 0xff, 0xff, 0xff)); // TODO: make color const
+    C2D_TargetClear(bottom, C2D_Color32(0xff, 0xff, 0xff, 0xff));
     C2D_SceneBegin(bottom);
 
     C3D_FrameEnd(0);
