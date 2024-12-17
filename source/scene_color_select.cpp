@@ -68,6 +68,21 @@ const char* scene_color_select_input(AppState* state, u32 down, u32 held) {
     else if(down & KEY_DRIGHT)
         current_selection++;
     
+    if(down & KEY_TOUCH) {
+        touchPosition touch;
+        hidTouchRead(&touch);
+        s32 x = (touch.px - 160 + (per_row * 20)) / 40;
+        s32 y = (touch.py - 120 + (per_row * 20)) / 40;
+        if(x >= 0 && x < (s32)per_row && y >= 0 && y < (s32)per_row) {
+            s32 new_selection = x + y * per_row;
+            if(new_selection == current_selection) {
+                state->dstate.current_color = colors[current_selection];
+                return nullptr;
+            }
+            current_selection = new_selection;
+        }
+    }
+    
     if(current_selection < 0)
         current_selection = 0;
     else if(current_selection >= (s32)(sizeof(colors) / sizeof(colors[0])))
