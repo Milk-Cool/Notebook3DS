@@ -78,8 +78,12 @@ const char* scene_color_select_input(AppState* state, u32 down, u32 held) {
 const char* scene_color_select_render(AppState* state, C3D_RenderTarget* top, C3D_RenderTarget* bottom) {
     // BOTTOM
     C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
-    C2D_TargetClear(bottom, accent_bg);
+    C2D_TargetClear(bottom, C2D_Color32(0xff, 0xff, 0xff, 0xff));
     C2D_SceneBegin(bottom);
+
+    for(u32 x = 0; x < 320; x += 20)
+        for(u32 y = 0; y < 240; y += 20)
+            if(x % 40 + y % 40 == 20) C2D_DrawRectSolid(x, y, 0, 20, 20, C2D_Color32(0x80, 0x80, 0x80, 0xff));
 
     u64 curtime = osGetTime();
     curtime /= 20;
