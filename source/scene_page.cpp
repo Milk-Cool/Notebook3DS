@@ -3,6 +3,7 @@
 #include "scene_help.h"
 #include "draw.h"
 #include "scene_color_select.h"
+#include "scene_thickness_select.h"
 
 #define DBLPRESS_MAX_DELAY 700
 
@@ -81,6 +82,8 @@ const char* scene_page_input(AppState* state, u32 down, u32 held) {
         return scene_help_name;
     else if(down & KEY_X)
         return scene_color_select_name;
+    else if(down & KEY_B)
+        return scene_thickness_select_name;
     else if(down & KEY_START) {
         for(uint32_t i = state->current_pages.size() - 1; i >= 0; i--) {
             if(state->current_pages[i].shapes.size() > 0) {

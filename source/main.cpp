@@ -18,6 +18,7 @@ extern "C" {
 #include "scene_page.h"
 #include "scene_help.h"
 #include "scene_color_select.h"
+#include "scene_thickness_select.h"
 
 using namespace std;
 
@@ -86,6 +87,13 @@ Scene scenes[] = {
 		.input = scene_color_select_input,
 		.render = scene_color_select_render,
 		.deinit = scene_color_select_deinit
+	},
+	{
+		.name = scene_thickness_select_name,
+		.init = scene_thickness_select_init,
+		.input = scene_thickness_select_input,
+		.render = scene_thickness_select_render,
+		.deinit = scene_thickness_select_deinit
 	},
 };
 
