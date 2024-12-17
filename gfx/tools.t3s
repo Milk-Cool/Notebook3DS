@@ -1,0 +1,6 @@
+--atlas -f rgb888 -z auto
+free.png
+line.png
+fillrect.png
+hollowrect.png
+text.png

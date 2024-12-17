@@ -4,6 +4,7 @@
 #include "draw.h"
 #include "scene_color_select.h"
 #include "scene_thickness_select.h"
+#include "scene_tool_select.h"
 
 #define DBLPRESS_MAX_DELAY 700
 
@@ -56,6 +57,22 @@ static void handle_input(AppState* state, u32 down, u32 held, Page* current_page
             .y = y
         });
         state->dstate.last_point_time = curtime;
+    } else if(state->dstate.current_tool == ToolText
+            && !state->dstate.last_touched) {
+        string text = get_input_text();
+        if(text.size() > 0) {
+            clear_undid(state);
+            current_page->shapes.push_back((Shape){
+                .type = ShapeTypeText,
+                .color = state->dstate.current_color,
+                .thickness = state->dstate.current_thickness / 2.5f,
+                .text = text
+            });
+            current_page->shapes.back().points.push_back((Point){
+                .x = touch.px,
+                .y = touch.py + (int32_t)state->dstate.scroll
+            });
+        }
     }
     state->dstate.last_touched = true;
 }
@@ -84,6 +101,8 @@ const char* scene_page_input(AppState* state, u32 down, u32 held) {
         return scene_color_select_name;
     else if(down & KEY_B)
         return scene_thickness_select_name;
+    else if(down & KEY_A)
+        return scene_tool_select_name;
     else if(down & KEY_START) {
         for(uint32_t i = state->current_pages.size() - 1; i >= 0; i--) {
             if(state->current_pages[i].shapes.size() > 0) {

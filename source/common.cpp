@@ -13,5 +13,18 @@ string get_input_name() {
         return string(name);
     return "";
 }
+string get_input_text() {
+    SwkbdState swkbd;
+    char text[60];
+    SwkbdButton button = SWKBD_BUTTON_NONE;
+    swkbdInit(&swkbd, SWKBD_TYPE_NORMAL, 2, -1);
+    swkbdSetHintText(&swkbd, "Enter the text");
+    swkbdSetButton(&swkbd, SWKBD_BUTTON_LEFT, "Cancel", false);
+    swkbdSetButton(&swkbd, SWKBD_BUTTON_RIGHT, "Place", true);
+    button = swkbdInputText(&swkbd, text, sizeof(text));
+    if(button == SWKBD_BUTTON_RIGHT)
+        return string(text);
+    return "";
+}
 
 u32 accent_bg = C2D_Color32(245, 162, 206, 0xFF);

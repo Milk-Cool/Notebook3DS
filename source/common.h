@@ -12,4 +12,5 @@ using namespace std;
 #define PAGE_HEIGHT (240 * 10)
 
 string get_input_name();
+string get_input_text();
 extern u32 accent_bg;

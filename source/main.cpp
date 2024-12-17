@@ -19,6 +19,7 @@ extern "C" {
 #include "scene_help.h"
 #include "scene_color_select.h"
 #include "scene_thickness_select.h"
+#include "scene_tool_select.h"
 
 using namespace std;
 
@@ -95,9 +96,17 @@ Scene scenes[] = {
 		.render = scene_thickness_select_render,
 		.deinit = scene_thickness_select_deinit
 	},
+	{
+		.name = scene_tool_select_name,
+		.init = scene_tool_select_init,
+		.input = scene_tool_select_input,
+		.render = scene_tool_select_render,
+		.deinit = scene_tool_select_deinit
+	},
 };
 
 void init() {
+	romfsInit();
 	gfxInitDefault();
 	C3D_Init(C3D_DEFAULT_CMDBUF_SIZE);
 	C2D_Init(C2D_DEFAULT_MAX_OBJECTS);
@@ -107,6 +116,7 @@ void deinit() {
 	C2D_Fini();
 	C3D_Fini();
 	gfxExit();
+	romfsExit();
 }
 
 void push_scene(const char* scene_name) {
