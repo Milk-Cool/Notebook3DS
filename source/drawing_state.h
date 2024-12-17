@@ -7,7 +7,8 @@ typedef enum {
     ToolLine,
     ToolFillRect,
     ToolHollowRect,
-    ToolText
+    ToolText,
+    ToolEraser,
 } Tool;
 
 typedef struct {

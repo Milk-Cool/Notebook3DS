@@ -106,6 +106,38 @@ static void handle_input(AppState* state, u32 down, u32 held, Page* current_page
                 .y = touch.py + (int32_t)state->dstate.scroll
             });
         }
+    } else if(state->dstate.current_tool == ToolEraser
+            && curtime - state->dstate.last_point_time > 10) {
+        for(u32 i = 0; i < current_page->shapes.size(); i++) {
+            Shape* shape = &current_page->shapes[i];
+            switch(shape->type) {
+            case ShapeTypeFillRect:
+            case ShapeTypeHollowRect:
+                if(touch.px >= min(shape->points[0].x, shape->points[1].x)
+                        && touch.px <= max(shape->points[0].x, shape->points[1].x)
+                        && touch.py >= min(shape->points[0].y, shape->points[1].y) - state->dstate.scroll
+                        && touch.py <= max(shape->points[0].y, shape->points[1].y) - state->dstate.scroll)
+                    current_page->shapes.erase(current_page->shapes.begin() + i);
+                break;
+            case ShapeTypeLine:
+                for(u32 j = 0; j < shape->points.size() - 1; j++)
+                    if(min_dist2(
+                        shape->points[j].x,
+                        shape->points[j].y - state->dstate.scroll,
+                        shape->points[j + 1].x,
+                        shape->points[j + 1].y - state->dstate.scroll,
+                        touch.px, touch.py
+                    ) < 9) {
+                        current_page->shapes.erase(current_page->shapes.begin() + i);
+                        break;
+                    }
+                break;
+            case ShapeTypeText:
+                if(dist2(shape->points[0].x, shape->points[0].y - state->dstate.scroll, touch.px, touch.py) < 900)
+                    current_page->shapes.erase(current_page->shapes.begin() + i);
+                break;
+            }
+        }
     }
     state->dstate.last_touched = true;
 }

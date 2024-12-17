@@ -27,4 +27,16 @@ string get_input_text() {
     return "";
 }
 
+float dist2(float x1, float y1, float x2, float y2) {
+    return (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
+}
+float min_dist2(float x1, float y1, float x2, float y2, float x3, float y3) {
+    // x1y1x2y2 is the segment, x3y3 is the other dot
+    const float l2 = dist2(x1, y1, x2, y2);
+    if(l2 == 0.0) return dist2(x1, y1, x3, y3);
+
+    const float t = max(0.0f, min(1.0f, ((x3 - x1) * (x2 - x1) + (y3 - y1) * (y2 - y1)) / l2));
+    return dist2(x3, y3, x1 + t * (x2 - x1), y1 + t * (y2 - y1));
+};
+
 u32 accent_bg = C2D_Color32(245, 162, 206, 0xFF);

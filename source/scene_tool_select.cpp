@@ -12,13 +12,14 @@ typedef struct {
     string name;
 } ToolWithSprite;
 static C2D_SpriteSheet spriteSheet;
-static C2D_Sprite sprites[5];
+static C2D_Sprite sprites[6];
 static ToolWithSprite tools[] = {
     { .tool = ToolFree, .name = "Free" },
     { .tool = ToolLine, .name = "Line" },
     { .tool = ToolFillRect, .name = "Filled rect" },
     { .tool = ToolHollowRect, .name = "Hollow rect" },
-    { .tool = ToolText, .name = "Text" }
+    { .tool = ToolText, .name = "Text" },
+    { .tool = ToolEraser, .name = "Eraser" }
 };
 static s32 current_selection = 0;
 
@@ -38,7 +39,7 @@ bool scene_tool_select_init(AppState* state) {
     for(u16 i = 0; i < sizeof(sprites) / sizeof(sprites[0]); i++) {
         C2D_SpriteFromSheet(&sprites[i], spriteSheet, i);
         C2D_SpriteSetCenter(&sprites[i], 0.5f, 0.5f);
-        C2D_SpriteSetPos(&sprites[i], 60 + i * 50, 120);
+        C2D_SpriteSetPos(&sprites[i], 35 + i * 50, 120);
         tools[i].sprite = &sprites[i];
     }
 
@@ -67,7 +68,7 @@ const char* scene_tool_select_input(AppState* state, u32 down, u32 held) {
         touchPosition touch;
         hidTouchRead(&touch);
         if(touch.py >= 120 && touch.py < 170) {
-            s32 x = (touch.px - 60 + 25) / 50;
+            s32 x = (touch.px - 35 + 25) / 50;
             if(x >= 0 && (u32)x < sizeof(tools) / sizeof(tools[0])) {
                 s32 new_selection = x;
                 if(new_selection == current_selection) {
@@ -109,7 +110,7 @@ const char* scene_tool_select_render(AppState* state, C3D_RenderTarget* top, C3D
         curtime = curtime % 10;
     else
         curtime = 10 - (curtime % 10);
-    C2D_DrawRectSolid(35 + current_selection * 50, 140, 0, 50, 5, C2D_Color32(0xff, 0x00, 0x00, curtime * 25));
+    C2D_DrawRectSolid(10 + current_selection * 50, 140, 0, 50, 5, C2D_Color32(0xff, 0x00, 0x00, curtime * 25));
 
     C3D_FrameEnd(0);
 
