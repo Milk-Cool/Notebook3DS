@@ -240,6 +240,10 @@ const char* scene_page_render(AppState* state, C3D_RenderTarget* top, C3D_Render
     C2D_SceneBegin(bottom);
     int32_t height_bottom = PAGE_HEIGHT - state->dstate.scroll;
     C2D_DrawRectSolid(0, 0, -1, 320, height_bottom < 240 ? height_bottom : 240, white);
+    u8 add = state->dstate.scroll % 10;
+    for(u8 x = 0; x < 32; x++)
+        for(u8 y = 0; y < 24; y++)
+            C2D_DrawRectSolid(x * 10, y * 10 + add, -1, 1, 1, C2D_Color32(0x00, 0x00, 0x00, 0x2f));
     C2D_DrawRectSolid(0, height_bottom, -1, 320, 5, black);
 
     Page* current_page = &state->current_pages[state->current_page_index];
