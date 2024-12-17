@@ -13,7 +13,7 @@ static bool check_one_point(Shape shape, u32 min_points, float margin) {
     if(shape.points.size() < min_points) return false;
     bool flag = false;
     for(Point p : shape.points)
-        if(p.x >= 0 - margin && p.y >= 0 - margin && p.x < 320 + margin && p.y < 240 + margin) {
+        if(p.y >= 0 - margin && p.y < 240 + margin) {
             flag = true;
             break;
         }
