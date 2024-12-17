@@ -17,6 +17,7 @@ extern "C" {
 #include "scene_topic_delete.h"
 #include "scene_page.h"
 #include "scene_help.h"
+#include "scene_color_select.h"
 
 using namespace std;
 
@@ -78,6 +79,13 @@ Scene scenes[] = {
 		.input = scene_help_input,
 		.render = scene_help_render,
 		.deinit = scene_help_deinit
+	},
+	{
+		.name = scene_color_select_name,
+		.init = scene_color_select_init,
+		.input = scene_color_select_input,
+		.render = scene_color_select_render,
+		.deinit = scene_color_select_deinit
 	},
 };
 

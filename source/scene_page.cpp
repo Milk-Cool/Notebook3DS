@@ -2,6 +2,7 @@
 #include "common.h"
 #include "scene_help.h"
 #include "draw.h"
+#include "scene_color_select.h"
 
 const char* scene_page_name = "page";
 
@@ -53,6 +54,8 @@ static void handle_input(AppState* state, u32 down, u32 held, Page* current_page
 const char* scene_page_input(AppState* state, u32 down, u32 held) {
     if(down & KEY_Y)
         return scene_help_name;
+    else if(down & KEY_X)
+        return scene_color_select_name;
     else if(down & KEY_START) {
         for(uint32_t i = state->current_pages.size() - 1; i >= 0; i--) {
             if(state->current_pages[i].shapes.size() > 0) {
