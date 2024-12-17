@@ -33,6 +33,7 @@ typedef struct {
 typedef struct {
     uint32_t index;
     vector<Shape> shapes;
+    vector<Shape> undid;
 } Page;
 typedef struct {
 	string id;

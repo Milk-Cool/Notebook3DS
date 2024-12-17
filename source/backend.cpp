@@ -195,40 +195,82 @@ static void push_back_bytes(vector<uint8_t>* buf, size_t bytes) {
 static void write_bytes_to_end(vector<uint8_t>* buf, uint8_t* data, size_t bytes) {
     memcpy(buf->data() + buf->size() - bytes, data, bytes);
 }
+static void write_shape_to_end(vector<uint8_t>& out, Shape shape) {
+    uint8_t ind = UINT8_MAX;
+    for(uint8_t j = 0; j < sizeof(shape_types) / sizeof(ShapeType); j++)
+        if(shape_types[j] == shape.type) {
+            ind = j;
+            break;
+        }
+    if(ind == UINT8_MAX) return;
+    out.push_back(ind);
+    push_back_bytes(&out, sizeof(uint32_t));
+    write_bytes_to_end(&out, (uint8_t*)&shape.color, sizeof(uint32_t));
+    uint32_t thickness_conv = (uint32_t)(shape.thickness * 1000); // CRUTCH: simply using float crashes 3ds
+    push_back_bytes(&out, sizeof(uint32_t));
+    write_bytes_to_end(&out, (uint8_t*)&thickness_conv, sizeof(uint32_t));
+    uint32_t points_len = shape.points.size();
+    push_back_bytes(&out, sizeof(uint32_t));
+    write_bytes_to_end(&out, (uint8_t*)&points_len, sizeof(uint32_t));
+    for(uint32_t j = 0; j < points_len; j++) {
+        push_back_bytes(&out, sizeof(uint16_t));
+        write_bytes_to_end(&out, (uint8_t*)&shape.points[j].x, sizeof(uint16_t));
+        push_back_bytes(&out, sizeof(uint16_t));
+        write_bytes_to_end(&out, (uint8_t*)&shape.points[j].y, sizeof(uint16_t));
+    }
+    uint32_t text_len = shape.text.size();
+    push_back_bytes(&out, text_len);
+    write_bytes_to_end(&out, (uint8_t*)shape.text.c_str(), text_len);
+    out.push_back(0);
+}
 vector<uint8_t> page2bin(Page page) {
     vector<uint8_t> out;
-    push_back_bytes(&out, sizeof(uint32_t));
+
     uint32_t shapes_len = page.shapes.size();
-    memcpy(out.data(), (uint8_t*)&shapes_len, sizeof(uint32_t));
+    push_back_bytes(&out, sizeof(uint32_t));
+    write_bytes_to_end(&out, (uint8_t*)&shapes_len, sizeof(uint32_t));
     for(uint32_t i = 0; i < shapes_len; i++) {
-        uint8_t ind = UINT8_MAX;
-        for(uint8_t j = 0; j < sizeof(shape_types) / sizeof(ShapeType); j++)
-            if(shape_types[j] == page.shapes[i].type) {
-                ind = j;
-                break;
-            }
-        if(ind == UINT8_MAX) continue;
-        out.push_back(ind);
-        push_back_bytes(&out, sizeof(uint32_t));
-        write_bytes_to_end(&out, (uint8_t*)&page.shapes[i].color, sizeof(uint32_t));
-        uint32_t thickness_conv = (uint32_t)(page.shapes[i].thickness * 1000); // CRUTCH: simply using float crashes 3ds
-        push_back_bytes(&out, sizeof(uint32_t));
-        write_bytes_to_end(&out, (uint8_t*)&thickness_conv, sizeof(uint32_t));
-        uint32_t points_len = page.shapes[i].points.size();
-        push_back_bytes(&out, sizeof(uint32_t));
-        write_bytes_to_end(&out, (uint8_t*)&points_len, sizeof(uint32_t));
-        for(uint32_t j = 0; j < points_len; j++) {
-            push_back_bytes(&out, sizeof(uint16_t));
-            write_bytes_to_end(&out, (uint8_t*)&page.shapes[i].points[j].x, sizeof(uint16_t));
-            push_back_bytes(&out, sizeof(uint16_t));
-            write_bytes_to_end(&out, (uint8_t*)&page.shapes[i].points[j].y, sizeof(uint16_t));
-        }
-        uint32_t text_len = page.shapes[i].text.size();
-        push_back_bytes(&out, text_len);
-        write_bytes_to_end(&out, (uint8_t*)page.shapes[i].text.c_str(), text_len);
-        out.push_back(0);
+        write_shape_to_end(out, page.shapes[i]);
+    }
+
+    uint32_t undid_len = page.undid.size();
+    push_back_bytes(&out, sizeof(uint32_t));
+    write_bytes_to_end(&out, (uint8_t*)&undid_len, sizeof(uint32_t));
+    for(uint32_t i = 0; i < undid_len; i++) {
+        write_shape_to_end(out, page.undid[i]);
     }
     return out;
+}
+static Shape read_shape(vector<uint8_t>& bin, uint32_t& ind) {
+    Shape shape;
+    shape.type = shape_types[bin[ind]]; // u8
+    ind += sizeof(uint8_t);
+    shape.color = *(uint32_t*)(bin.data() + ind); // u32
+    ind += sizeof(uint32_t);
+    uint32_t thickness_u32;
+    // CRUTCH: doesn't work without memcpy, probably because it's copied to a float in the end.
+    // God, I hate ARM.
+    memcpy(&thickness_u32, bin.data() + ind, sizeof(uint32_t));
+    float thickness_fl = thickness_u32;
+    thickness_fl /= 1000.0f;
+    shape.thickness = thickness_fl;
+    ind += sizeof(uint32_t);
+    uint32_t points_len = *(uint32_t*)(bin.data() + ind);
+    ind += sizeof(uint32_t);
+    for(uint32_t j = 0; j < points_len; j++) {
+        Point point;
+        point.x = *(uint16_t*)(bin.data() + ind);
+        ind += sizeof(uint16_t);
+        point.y = *(uint16_t*)(bin.data() + ind);
+        ind += sizeof(uint16_t);
+        shape.points.push_back(point);
+    }
+    while(true) {
+        char c = bin[ind++];
+        if(c == '\0') break;
+        shape.text.push_back(c);
+    }
+    return shape;
 }
 Page bin2page(vector<uint8_t> bin) {
     Page out;
@@ -236,35 +278,12 @@ Page bin2page(vector<uint8_t> bin) {
     uint32_t shapes_len = *(uint32_t*)bin.data();
     uint32_t ind = sizeof(uint32_t);
     for(uint32_t i = 0; i < shapes_len; i++) {
-        Shape shape;
-        shape.type = shape_types[bin[ind]]; // u8
-        ind += sizeof(uint8_t);
-        shape.color = *(uint32_t*)(bin.data() + ind); // u32
-        ind += sizeof(uint32_t);
-        uint32_t thickness_u32;
-        // CRUTCH: doesn't work without memcpy, probably because it's copied to a float in the end.
-        // God, I hate ARM.
-        memcpy(&thickness_u32, bin.data() + ind, sizeof(uint32_t));
-        float thickness_fl = thickness_u32;
-        thickness_fl /= 1000.0f;
-        shape.thickness = thickness_fl;
-        ind += sizeof(uint32_t);
-        uint32_t points_len = *(uint32_t*)(bin.data() + ind);
-        ind += sizeof(uint32_t);
-        for(uint32_t j = 0; j < points_len; j++) {
-            Point point;
-            point.x = *(uint16_t*)(bin.data() + ind);
-            ind += sizeof(uint16_t);
-            point.y = *(uint16_t*)(bin.data() + ind);
-            ind += sizeof(uint16_t);
-            shape.points.push_back(point);
-        }
-        while(true) {
-            char c = bin[ind++];
-            if(c == '\0') break;
-            shape.text.push_back(c);
-        }
-        out.shapes.push_back(shape);
+        out.shapes.push_back(read_shape(bin, ind));
+    }
+    uint32_t undid_len = *(uint32_t*)(bin.data() + ind);
+    ind += sizeof(uint32_t);
+    for(uint32_t i = 0; i < undid_len; i++) {
+        out.undid.push_back(read_shape(bin, ind));
     }
     return out;
 }

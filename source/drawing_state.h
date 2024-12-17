@@ -1,5 +1,6 @@
 #pragma once
 #include <stdint.h>
+#include <queue>
 
 typedef enum {
     ToolFree,
@@ -17,4 +18,6 @@ typedef struct {
     uint64_t last_point_time;
     bool last_touched;
     int32_t scroll;
+    queue<uint64_t> input_queue_l;
+    queue<uint64_t> input_queue_r;
 } DrawingState;

@@ -4,6 +4,8 @@
 #include "draw.h"
 #include "scene_color_select.h"
 
+#define DBLPRESS_MAX_DELAY 700
+
 const char* scene_page_name = "page";
 
 static C2D_TextBuf g_staticBuf, g_dynamicBuf;
@@ -31,15 +33,20 @@ bool scene_page_init(AppState* state) {
 
     return true;
 }
+static void clear_undid(AppState* state) {
+    state->current_pages[state->current_page_index].undid.clear();
+}
 static void handle_input(AppState* state, u32 down, u32 held, Page* current_page, touchPosition touch, u64 curtime) {
     if(state->dstate.current_tool == ToolFree
             && curtime - state->dstate.last_point_time > 10) {
-        if(!state->dstate.last_touched)
+        if(!state->dstate.last_touched) {
+            clear_undid(state);
             current_page->shapes.push_back((Shape){
                 .type = ShapeTypeLine,
                 .color = state->dstate.current_color,
                 .thickness = state->dstate.current_thickness
             });
+        }
         uint16_t y = touch.py + (int32_t)state->dstate.scroll;
         if(y >= PAGE_HEIGHT)
             y = PAGE_HEIGHT - 1;
@@ -50,6 +57,24 @@ static void handle_input(AppState* state, u32 down, u32 held, Page* current_page
         state->dstate.last_point_time = curtime;
     }
     state->dstate.last_touched = true;
+}
+static void undo(AppState* state) {
+    Page& page = state->current_pages[state->current_page_index];
+    if(page.shapes.size() == 0)
+        return;
+    page.undid.push_back(
+        page.shapes.back()
+    );
+    page.shapes.pop_back();
+}
+static void redo(AppState* state) {
+    Page& page = state->current_pages[state->current_page_index];
+    if(page.undid.size() == 0)
+        return;
+    page.shapes.push_back(
+        page.undid.back()
+    );
+    page.undid.pop_back();
 }
 const char* scene_page_input(AppState* state, u32 down, u32 held) {
     if(down & KEY_Y)
@@ -86,11 +111,28 @@ const char* scene_page_input(AppState* state, u32 down, u32 held) {
             state->current_page_index--;
     }
 
+    u64 curtime = osGetTime();
+    if(down & KEY_L) {
+        state->dstate.input_queue_l.push(curtime);
+        if(state->dstate.input_queue_l.size() == 3) {
+            state->dstate.input_queue_l.pop();
+            if(state->dstate.input_queue_l.back() - state->dstate.input_queue_l.front() < DBLPRESS_MAX_DELAY)
+                undo(state);
+        }
+    }
+    if(down & KEY_R) {
+        state->dstate.input_queue_r.push(curtime);
+        if(state->dstate.input_queue_r.size() == 3) {
+            state->dstate.input_queue_r.pop();
+            if(state->dstate.input_queue_r.back() - state->dstate.input_queue_r.front() < DBLPRESS_MAX_DELAY)
+                redo(state);
+        }
+    }
+
     touchPosition touch;
     hidTouchRead(&touch);
 
     Page* current_page = &state->current_pages[state->current_page_index];
-    u64 curtime = osGetTime();
 
     if(held & KEY_TOUCH)
         handle_input(state, down, held, current_page, touch, curtime);
