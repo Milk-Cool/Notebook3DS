@@ -7,6 +7,7 @@ extern "C" {
 #include <citro2d.h>
 }
 #include "backend.h"
+#include "common.h"
 
 void draw_init();
 void draw_deinit();

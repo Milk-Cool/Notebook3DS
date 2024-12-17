@@ -11,13 +11,13 @@ void draw_deinit() {
 
 static bool check_one_point(Shape shape, u32 min_points, float margin) {
     if(shape.points.size() < min_points) return false;
-    bool flag = false;
-    for(Point p : shape.points)
-        if(p.y >= 0 - margin && p.y < 240 + margin) {
-            flag = true;
-            break;
-        }
-    return flag;
+    float max_y = 0;
+    float min_y = PAGE_HEIGHT;
+    for(Point p : shape.points) {
+        max_y = max_y > p.y ? max_y : p.y;
+        min_y = min_y < p.y ? min_y : p.y;
+    }
+    return max_y >= 0 - margin && min_y < 240 + margin;
 }
 
 static void draw_hollow_rect_basic(Shape shape) {
