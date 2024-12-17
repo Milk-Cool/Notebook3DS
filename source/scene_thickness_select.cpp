@@ -63,6 +63,7 @@ const char* scene_thickness_select_render(AppState* state, C3D_RenderTarget* top
     u32 black = C2D_Color32(0x00, 0x00, 0x00, 0xff);
     C2D_DrawTriangle(60, 120, black, 260, 110, black, 260, 130, black, 0);
     u32 white = C2D_Color32(0xff, 0xff, 0xff, 0xff);
+    C2D_DrawCircleSolid(x, 120, 0, 17, black);
     C2D_DrawCircleSolid(x, 120, 0, 15, white);
 
     C3D_FrameEnd(0);
