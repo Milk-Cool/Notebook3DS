@@ -93,8 +93,10 @@ const char* scene_color_select_render(AppState* state, C3D_RenderTarget* top, C3
         curtime = 10 - (curtime % 10);
     for(u32 i = 0; i < sizeof(colors) / sizeof(colors[0]); i++) {
         C2D_DrawRectSolid(160 - (per_row * 20) + (i % per_row) * 40, 120 - (per_row * 20) + (i / per_row) * 40, 0, 40, 40, colors[i]);
-        if((s32)i == current_selection)
+        if((s32)i == current_selection) {
+            C2D_DrawRectSolid(160 - (per_row * 20) + (i % per_row) * 40, 120 - (per_row * 20) + (i / per_row) * 40, 0, 40, 5, C2D_Color32(0x00, 0x00, 0xff, curtime * 25));
             C2D_DrawRectSolid(160 - (per_row * 20) + (i % per_row) * 40, 155 - (per_row * 20) + (i / per_row) * 40, 0, 40, 5, C2D_Color32(0xff, 0x00, 0x00, curtime * 25));
+        }
     }
 
     C3D_FrameEnd(0);
