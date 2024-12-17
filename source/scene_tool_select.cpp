@@ -63,6 +63,7 @@ const char* scene_tool_select_input(AppState* state, u32 down, u32 held) {
         current_selection++;
     
     if(down & KEY_TOUCH) {
+        state->dstate.touch_in_another_scene = true;
         touchPosition touch;
         hidTouchRead(&touch);
         if(touch.py >= 120 && touch.py < 170) {
@@ -76,7 +77,8 @@ const char* scene_tool_select_input(AppState* state, u32 down, u32 held) {
                 current_selection = new_selection;
             }
         }
-    }
+    } else
+        state->dstate.touch_in_another_scene = false;
 
     if(current_selection < 0)
         current_selection = 0;

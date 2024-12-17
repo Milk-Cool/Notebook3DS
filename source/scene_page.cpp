@@ -27,6 +27,7 @@ bool scene_page_init(AppState* state) {
     state->dstate.current_thickness = 3;
     state->dstate.last_point_time = 0;
     state->dstate.last_touched = false;
+    state->dstate.touch_in_another_scene = false;
     state->dstate.scroll = 0;
 
     state->current_page_index = 0;
@@ -156,10 +157,13 @@ const char* scene_page_input(AppState* state, u32 down, u32 held) {
 
     Page* current_page = &state->current_pages[state->current_page_index];
 
-    if(held & KEY_TOUCH)
-        handle_input(state, down, held, current_page, touch, curtime);
-    else
+    if(held & KEY_TOUCH) {
+        if(!state->dstate.touch_in_another_scene)
+            handle_input(state, down, held, current_page, touch, curtime);
+    } else {
+        state->dstate.touch_in_another_scene = false;
         state->dstate.last_touched = false;
+    }
     
     return "";
 }

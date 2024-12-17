@@ -32,11 +32,13 @@ const char* scene_thickness_select_input(AppState* state, u32 down, u32 held) {
         current_thickness -= .1;
     else if(down & KEY_DRIGHT)
         current_thickness += .1;
-    else if(held & KEY_TOUCH) {
+    if(held & KEY_TOUCH) {
+        state->dstate.touch_in_another_scene = true;
         touchPosition touch;
         hidTouchRead(&touch);
         current_thickness = limit / 2 + ((float)touch.px - 160) / 40;
-    }
+    } else
+        state->dstate.touch_in_another_scene = false;
     
     if(current_thickness < 0)
         current_thickness = 0;

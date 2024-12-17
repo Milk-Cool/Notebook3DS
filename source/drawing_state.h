@@ -20,4 +20,5 @@ typedef struct {
     int32_t scroll;
     queue<uint64_t> input_queue_l;
     queue<uint64_t> input_queue_r;
+    bool touch_in_another_scene;
 } DrawingState;
