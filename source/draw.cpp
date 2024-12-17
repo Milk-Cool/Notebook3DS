@@ -9,9 +9,20 @@ void draw_deinit() {
     C2D_TextBufDelete(buf);
 }
 
+static bool check_one_point(Shape shape, u32 min_points, float margin) {
+    if(shape.points.size() < min_points) return false;
+    bool flag = false;
+    for(Point p : shape.points)
+        if(p.x >= 0 - margin && p.y >= 0 - margin && p.x < 320 + margin && p.y < 240 + margin) {
+            flag = true;
+            break;
+        }
+    return flag;
+}
+
 static void draw_hollow_rect_basic(Shape shape) {
     if(shape.type != ShapeTypeHollowRect) return; // safety
-    if(shape.points.size() != 2) return;
+    if(!check_one_point(shape, 2, shape.thickness)) return;
 
     C2D_DrawLine(shape.points[0].x, shape.points[0].y, shape.color, shape.points[1].x, shape.points[0].y, shape.color, shape.thickness, 0);
     C2D_DrawLine(shape.points[0].x, shape.points[0].y, shape.color, shape.points[0].x, shape.points[1].y, shape.color, shape.thickness, 0);
@@ -25,13 +36,13 @@ static void draw_hollow_rect_basic(Shape shape) {
 }
 static void draw_fill_rect_basic(Shape shape) {
     if(shape.type != ShapeTypeFillRect) return; // safety
-    if(shape.points.size() != 2) return;
+    if(!check_one_point(shape, 2, 0)) return;
     C2D_DrawRectSolid(shape.points[0].x, shape.points[0].y, 0, shape.points[1].x
         - shape.points[0].x,shape.points[1].y - shape.points[0].y, shape.color);
 }
 static void draw_line_basic(Shape shape) {
     if(shape.type != ShapeTypeLine) return;
-    if(shape.points.size() == 0) return;
+    if(!check_one_point(shape, 0, shape.thickness)) return;
     C2D_DrawCircleSolid(shape.points[0].x, shape.points[0].y, 0, shape.thickness / 2, shape.color);
     for(uint32_t i = 0; i < shape.points.size() - 1; i++)
         C2D_DrawLine(shape.points[i].x, shape.points[i].y, shape.color, shape.points[i + 1].x, shape.points[i + 1].y, shape.color, shape.thickness, 0);
@@ -39,7 +50,7 @@ static void draw_line_basic(Shape shape) {
 }
 static void draw_text_basic(Shape shape) {
     if(shape.type != ShapeTypeText) return;
-    if(shape.points.size() != 1) return;
+    if(!check_one_point(shape, 1, shape.thickness * 75)) return; // we assume that max height is thickness x 75 px
     C2D_Text text;
 	C2D_TextBufClear(buf);
     C2D_TextParse(&text, buf, shape.text.c_str());
