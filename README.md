@@ -8,7 +8,7 @@ A simple but capable notebook app for your 3DS\
 ## Guide
 Touchscreen is supported in most places.\
 On first open, you'll need to create a folder and a topic for your notes. You can press <kbd>X</kbd> in the menus to do that. To enter a folder or a topic, press <kbd>A</kbd>.\
-While drawing, you can always check the usage guide by pressing <kbd>Y</kbd>. There's not much to know other than that, so hope you find this useful for taking notes!
+While drawing, you can always check the usage guide by pressing <kbd>Y</kbd>. There's not much to know other than that, so hope you find this useful for taking notes!\
 ![Guide](https://raw.githubusercontent.com/Milk-Cool/Notebook3DS/refs/heads/main/screenshots/guide.bmp)
 
 ## Download
