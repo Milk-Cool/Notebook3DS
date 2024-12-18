@@ -1,5 +1,5 @@
 # Notebook3DS
-A simple but capable notebook app for your 3DS\
+A simple but capable notebook app for your 3DS
 <p align="center">
 <img width="400" src="https://raw.githubusercontent.com/Milk-Cool/Notebook3DS/refs/heads/main/screenshots/example_top.bmp"><br>
 <img width="320" src="https://raw.githubusercontent.com/Milk-Cool/Notebook3DS/refs/heads/main/screenshots/example_bottom.bmp">
