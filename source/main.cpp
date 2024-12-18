@@ -20,6 +20,7 @@ extern "C" {
 #include "scene_color_select.h"
 #include "scene_thickness_select.h"
 #include "scene_tool_select.h"
+#include "scene_danger_zone.h"
 
 using namespace std;
 
@@ -102,6 +103,13 @@ Scene scenes[] = {
 		.input = scene_tool_select_input,
 		.render = scene_tool_select_render,
 		.deinit = scene_tool_select_deinit
+	},
+	{
+		.name = scene_danger_zone_name,
+		.init = scene_danger_zone_init,
+		.input = scene_danger_zone_input,
+		.render = scene_danger_zone_render,
+		.deinit = scene_danger_zone_deinit
 	},
 };
 

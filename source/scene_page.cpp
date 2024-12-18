@@ -5,8 +5,7 @@
 #include "scene_color_select.h"
 #include "scene_thickness_select.h"
 #include "scene_tool_select.h"
-
-#define DBLPRESS_MAX_DELAY 700
+#include "scene_danger_zone.h"
 
 const char* scene_page_name = "page";
 
@@ -29,15 +28,13 @@ bool scene_page_init(AppState* state) {
     state->dstate.last_touched = false;
     // state->dstate.touch_in_another_scene = false;
     state->dstate.scroll = 0;
+    state->dstate.exit = false;
 
     state->current_page_index = 0;
     if(state->current_pages.size() == 0)
         state->current_pages.push_back((Page){ .index = 0 });
 
     return true;
-}
-static void clear_undid(AppState* state) {
-    state->current_pages[state->current_page_index].undid.clear();
 }
 static void handle_input(AppState* state, u32 down, u32 held, Page* current_page, touchPosition touch, u64 curtime) {
     if(state->dstate.current_tool == ToolFree
@@ -160,6 +157,9 @@ static void redo(AppState* state) {
     page.undid.pop_back();
 }
 const char* scene_page_input(AppState* state, u32 down, u32 held) {
+    if(state->dstate.exit)
+        return nullptr;
+
     if(down & KEY_Y)
         return scene_help_name;
     else if(down & KEY_X)
@@ -178,6 +178,8 @@ const char* scene_page_input(AppState* state, u32 down, u32 held) {
         for(Page page : state->current_pages)
             save_page(state->folders[state->current_folder_index].id, state->current_topics[state->current_topic_index].id, page);
         return nullptr;
+    } else if(down & KEY_SELECT) {
+        return scene_danger_zone_name;
     }
 
     if(held & KEY_DDOWN) {

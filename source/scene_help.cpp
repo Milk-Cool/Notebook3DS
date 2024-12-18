@@ -20,6 +20,7 @@ bool scene_help_init(AppState* state) {
         "2x - redo\n"
         " - change pages/scroll\n"
         "START - quit\n"
+        "SELECT - danger zone\n"
         "\n"
         "Press  to go back"
     );
@@ -46,7 +47,7 @@ const char* scene_help_render(AppState* state, C3D_RenderTarget* top, C3D_Render
     C2D_SceneBegin(top);
 
 	// Draw static text strings
-	C2D_DrawText(&g_staticText, C2D_AlignCenter, 200, 25, 0, .55, .55);
+	C2D_DrawText(&g_staticText, C2D_AlignCenter, 200, 15, 0, .55, .55);
 
     C3D_FrameEnd(0);
 

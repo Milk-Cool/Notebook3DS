@@ -76,6 +76,9 @@ s32 get_selection(s32 current_selection, u32 size, touchPosition touch) {
 s32 get_stop() {
     return numeric_limits<s32>::min();
 }
+void clear_undid(AppState* state) {
+    state->current_pages[state->current_page_index].undid.clear();
+}
 
 u32 accent_bg = C2D_Color32(245, 162, 206, 0xFF);
 
