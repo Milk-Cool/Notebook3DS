@@ -39,6 +39,10 @@ bool scene_topic_select_init(AppState* state) {
 	C2D_TextOptimize(&g_staticTitle);
     return true;
 }
+static void wrap_selection(AppState* state) {
+	if(current_selection >= (s32)state->current_topics.size()) current_selection = 0;
+	if(current_selection < 0) current_selection = state->current_topics.size() - 1;
+}
 const char* scene_topic_select_input(AppState* state, u32 down, u32 held) {
 	// input events come before rendering
 	if(state->needs_reinit) {
@@ -52,6 +56,25 @@ const char* scene_topic_select_input(AppState* state, u32 down, u32 held) {
 
 	string current_folder_id = state->folders[state->current_folder_index].id;
 	if(state->current_topics.size() != 0) {
+		if(down & KEY_TOUCH) {
+			state->dstate.touch_in_another_scene = true;
+			touchPosition touch;
+			hidTouchRead(&touch);
+			s32 new_selection = get_selection(current_selection, state->folders.size(), touch);
+			if(new_selection == get_stop()) {
+				state->current_topic_index = current_selection;
+				// we do not load pages in scene_page but rather here
+				state->current_pages = get_pages(
+					state->folders[state->current_folder_index].id,
+					state->current_topics[state->current_topic_index].id
+				);
+				return scene_page_name;
+			}
+			current_selection = new_selection;
+			wrap_selection(state);
+		} else
+			state->dstate.touch_in_another_scene = false;
+
 		if(down & KEY_A) {
 			state->current_topic_index = current_selection;
 			// we do not load pages in scene_page but rather here
@@ -62,10 +85,10 @@ const char* scene_topic_select_input(AppState* state, u32 down, u32 held) {
 			return scene_page_name;
 		} else if(down & KEY_DOWN) {
 			current_selection++;
-			if(current_selection == (s32)state->current_topics.size()) current_selection = 0;
+			wrap_selection(state);
 		} else if(down & KEY_UP) {
 			current_selection--;
-			if(current_selection == -1) current_selection = state->current_topics.size() - 1;
+			wrap_selection(state);
 		} else if(down & KEY_Y) {
 			state->current_topic_index = current_selection;
 			return scene_topic_delete_name;

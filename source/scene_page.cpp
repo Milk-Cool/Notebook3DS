@@ -27,7 +27,7 @@ bool scene_page_init(AppState* state) {
     state->dstate.current_thickness = 3;
     state->dstate.last_point_time = 0;
     state->dstate.last_touched = false;
-    state->dstate.touch_in_another_scene = false;
+    // state->dstate.touch_in_another_scene = false;
     state->dstate.scroll = 0;
 
     state->current_page_index = 0;
