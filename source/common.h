@@ -13,6 +13,7 @@ using namespace std;
 #define DBLPRESS_MAX_DELAY 700
 
 #define PAGE_HEIGHT (240 * 10)
+#define CURRENT_VERSION 10000 // AABBCC = AA.BB.CC
 
 string get_input_name();
 string get_input_text();

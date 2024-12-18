@@ -1,4 +1,5 @@
 #include "backend.h"
+#include "common.h"
 
 void init_backend() {
     struct stat st = { 0 };
@@ -226,6 +227,10 @@ static void write_shape_to_end(vector<uint8_t>& out, Shape shape) {
 vector<uint8_t> page2bin(Page page) {
     vector<uint8_t> out;
 
+    uint32_t version = CURRENT_VERSION;
+    push_back_bytes(&out, sizeof(uint32_t));
+    write_bytes_to_end(&out, (uint8_t*)&version, sizeof(uint32_t));
+
     uint32_t shapes_len = page.shapes.size();
     push_back_bytes(&out, sizeof(uint32_t));
     write_bytes_to_end(&out, (uint8_t*)&shapes_len, sizeof(uint32_t));
@@ -241,7 +246,8 @@ vector<uint8_t> page2bin(Page page) {
     }
     return out;
 }
-static Shape read_shape(vector<uint8_t>& bin, uint32_t& ind) {
+static Shape read_shape(vector<uint8_t>& bin, uint32_t& ind, uint32_t version) {
+    (void)version; // just one format for now
     Shape shape;
     shape.type = shape_types[bin[ind]]; // u8
     ind += sizeof(uint8_t);
@@ -275,15 +281,17 @@ static Shape read_shape(vector<uint8_t>& bin, uint32_t& ind) {
 Page bin2page(vector<uint8_t> bin) {
     Page out;
     out.index = 0xffffffff;
-    uint32_t shapes_len = *(uint32_t*)bin.data();
+    uint32_t version = *(uint32_t*)bin.data();
     uint32_t ind = sizeof(uint32_t);
+    uint32_t shapes_len = *(uint32_t*)(bin.data() + ind);
+    ind += sizeof(uint32_t);
     for(uint32_t i = 0; i < shapes_len; i++) {
-        out.shapes.push_back(read_shape(bin, ind));
+        out.shapes.push_back(read_shape(bin, ind, version));
     }
     uint32_t undid_len = *(uint32_t*)(bin.data() + ind);
     ind += sizeof(uint32_t);
     for(uint32_t i = 0; i < undid_len; i++) {
-        out.undid.push_back(read_shape(bin, ind));
+        out.undid.push_back(read_shape(bin, ind, version));
     }
     return out;
 }
