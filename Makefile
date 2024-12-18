@@ -43,7 +43,7 @@ GRAPHICS	:=	gfx
 ROMFS		:=	romfs
 GFXBUILD	:=	$(ROMFS)/gfx
 
-APP_VER				:= 1.0.0
+APP_VER				:= 1.1.0
 APP_TITLE			:= Notebook3DS
 APP_DESCRIPTION		:= A simple 3DS notebook app
 APP_AUTHOR			:= Milk_Cool
