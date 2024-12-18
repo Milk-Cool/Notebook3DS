@@ -169,7 +169,7 @@ const char* scene_page_input(AppState* state, u32 down, u32 held) {
     else if(down & KEY_A)
         return scene_tool_select_name;
     else if(down & KEY_START) {
-        for(uint32_t i = state->current_pages.size() - 1; i >= 0; i--) {
+        for(int32_t i = state->current_pages.size() - 1; i >= 0; i--) {
             if(state->current_pages[i].shapes.size() > 0) {
                 state->current_pages.resize(i + 1);
                 break;
