@@ -4,7 +4,7 @@
 const char* scene_thickness_select_name = "thickness_select";
 
 static C2D_TextBuf g_staticBuf, g_dynamicBuf;
-static C2D_Text g_staticText;
+static C2D_Text g_staticText, g_staticButton;
 
 static float current_thickness = 0;
 static float limit = 5;
@@ -19,7 +19,9 @@ bool scene_thickness_select_init(AppState* state) {
         "Thickness select\n"
         "Press  to go back"
     );
+	C2D_TextParse(&g_staticButton, g_staticBuf, "OK");
 	C2D_TextOptimize(&g_staticText);
+	C2D_TextOptimize(&g_staticButton);
     return true;
 }
 const char* scene_thickness_select_input(AppState* state, u32 down, u32 held) {
@@ -36,6 +38,10 @@ const char* scene_thickness_select_input(AppState* state, u32 down, u32 held) {
         state->dstate.touch_in_another_scene = true;
         touchPosition touch;
         hidTouchRead(&touch);
+        if(touch.py > 210) {
+            state->dstate.current_thickness = current_thickness;
+            return nullptr;
+        }
         current_thickness = limit / 2 + ((float)touch.px - 160) / 40;
     } else
         state->dstate.touch_in_another_scene = false;
@@ -67,6 +73,9 @@ const char* scene_thickness_select_render(AppState* state, C3D_RenderTarget* top
     u32 white = C2D_Color32(0xff, 0xff, 0xff, 0xff);
     C2D_DrawCircleSolid(x, 120, 0, 17, black);
     C2D_DrawCircleSolid(x, 120, 0, 15, white);
+
+    C2D_DrawRectSolid(0, 210, 1, 320, 30, C2D_Color32(0x00, 0x00, 0x00, 0x7f));
+    C2D_DrawText(&g_staticButton, C2D_AlignCenter | C2D_WithColor, 160, 215, 1, 0.5f, 0.5f, C2D_Color32(0xff, 0xff, 0xff, 0xff));
 
     C3D_FrameEnd(0);
 
