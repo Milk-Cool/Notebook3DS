@@ -1,6 +1,9 @@
 #include "common.h"
 #include <limits>
 
+#define OVERCLOCK (1 << 0)
+#define L2_CACHE (1 << 1)
+
 string get_input_name() {
     SwkbdState swkbd;
     char name[60];
@@ -49,7 +52,7 @@ s32 get_selection(s32 current_selection, u32 size, touchPosition touch) {
             current_selection += 2;
         }
     }
-    else if(current_selection == size - 1
+    else if(current_selection == (s32)size - 1
             && size >= 3) {
         if(touch.py >= 110 && touch.py < 170) {
             current_selection--;
@@ -75,3 +78,8 @@ s32 get_stop() {
 }
 
 u32 accent_bg = C2D_Color32(245, 162, 206, 0xFF);
+
+void overclock() {
+    if(!PTMSYSM_CheckNew3DS()) return;
+    PTMSYSM_ConfigureNew3DSCPU(OVERCLOCK | L2_CACHE);
+}
