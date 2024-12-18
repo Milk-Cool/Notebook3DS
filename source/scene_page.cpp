@@ -182,11 +182,11 @@ const char* scene_page_input(AppState* state, u32 down, u32 held) {
         return scene_danger_zone_name;
     }
 
-    if(held & KEY_DDOWN) {
+    if(held & KEY_DOWN) {
         state->dstate.scroll += scroll_add;
         if(state->dstate.scroll > PAGE_HEIGHT)
             state->dstate.scroll = PAGE_HEIGHT;
-    } else if(held & KEY_DUP) {
+    } else if(held & KEY_UP) {
         state->dstate.scroll -= scroll_add;
         if(state->dstate.scroll < 0)
             state->dstate.scroll = 0;
