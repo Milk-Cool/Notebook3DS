@@ -7,7 +7,7 @@
 const char* scene_topic_select_name = "topic_select";
 
 static C2D_TextBuf g_staticBuf, g_dynamicBuf;
-static C2D_Text g_staticText, g_staticTitle;
+static C2D_Text g_staticText, g_staticTitle, g_buttons[4];
 
 static s32 current_selection;
 
@@ -34,14 +34,35 @@ bool scene_topic_select_init(AppState* state) {
 	C2D_TextParse(&g_staticText, g_staticBuf, "Select topic or press  to create a new one\nPress  to remove, or SELECT to rename");
 	C2D_TextParse(&g_staticTitle, g_staticBuf, state->folders[state->current_folder_index].name.c_str());
 
+	C2D_TextParse(&g_buttons[0], g_staticBuf, "Back");
+	C2D_TextParse(&g_buttons[1], g_staticBuf, "Create");
+	C2D_TextParse(&g_buttons[2], g_staticBuf, "Remove");
+	C2D_TextParse(&g_buttons[3], g_staticBuf, "Rename");
+
 	// Optimize the static text strings
 	C2D_TextOptimize(&g_staticText);
 	C2D_TextOptimize(&g_staticTitle);
+	for(int i = 0; i < 3; i++)
+		C2D_TextOptimize(&g_buttons[i]);
     return true;
 }
 static void wrap_selection(AppState* state) {
 	if(current_selection >= (s32)state->current_topics.size()) current_selection = 0;
 	if(current_selection < 0) current_selection = state->current_topics.size() - 1;
+}
+static void rename(AppState* state) {
+	string name = get_input_name();
+	if(name != "") {
+		rename_topic(state->folders[state->current_folder_index].id, state->current_topics[current_selection].id, name);
+		reinit_topics(state);
+	}
+}
+static void create(AppState* state) {
+	string name = get_input_name();
+	if(name != "") {
+		create_topic(state->folders[state->current_folder_index].id, name);
+		reinit_topics(state);
+	}
 }
 const char* scene_topic_select_input(AppState* state, u32 down, u32 held) {
 	// input events come before rendering
@@ -54,12 +75,21 @@ const char* scene_topic_select_input(AppState* state, u32 down, u32 held) {
         return nullptr;
 	}
 
-	string current_folder_id = state->folders[state->current_folder_index].id;
 	if(state->current_topics.size() != 0) {
 		if(down & KEY_TOUCH) {
 			state->dstate.touch_in_another_scene = true;
 			touchPosition touch;
 			hidTouchRead(&touch);
+			if(touch.px >= 5 && touch.px < 78 && touch.py >= 5 && touch.py < 40) {
+				return nullptr;
+			} else if(touch.px >= 83 && touch.px < 156 && touch.py >= 5 && touch.py < 40) {
+				create(state);
+			} else if(touch.px >= 161 && touch.px < 234 && touch.py >= 5 && touch.py < 40) {
+				state->current_topic_index = current_selection;
+				return scene_topic_delete_name;
+			} else if(touch.px >= 239 && touch.px < 315 && touch.py >= 5 && touch.py < 40) {
+				rename(state);
+			}
 			s32 new_selection = get_selection(current_selection, state->folders.size(), touch);
 			if(new_selection == get_stop()) {
 				state->current_topic_index = current_selection;
@@ -93,20 +123,21 @@ const char* scene_topic_select_input(AppState* state, u32 down, u32 held) {
 			state->current_topic_index = current_selection;
 			return scene_topic_delete_name;
 		} else if(down & KEY_SELECT) {
-			string name = get_input_name();
-			if(name != "") {
-				rename_topic(current_folder_id, state->current_topics[current_selection].id, name);
-				reinit_topics(state);
-			}
+			rename(state);
 		}
-	}
+	} else if(down & KEY_TOUCH) {
+		state->dstate.touch_in_another_scene = true;
+		touchPosition touch;
+		hidTouchRead(&touch);
+		if(touch.px >= 5 && touch.px < 78 && touch.py >= 5 && touch.py < 40) {
+			return nullptr;
+		} else if(touch.px >= 83 && touch.px < 156 && touch.py >= 5 && touch.py < 40) {
+			create(state);
+		}
+	} else state->dstate.touch_in_another_scene = false;
 
 	if(down & KEY_X) {
-		string name = get_input_name();
-		if(name != "") {
-			create_topic(current_folder_id, name);
-			reinit_topics(state);
-		}
+		create(state);
 	}
     return "";
 }
@@ -118,8 +149,10 @@ const char* scene_topic_select_render(AppState* state, C3D_RenderTarget* top, C3
 	// Clear the dynamic text buffer
 	C2D_TextBufClear(g_dynamicBuf);
 
-	// Draw static text strings
-	C2D_DrawText(&g_staticText, C2D_AlignCenter, 160, 5, 0, .55, .55);
+	C2D_DrawRectSolid(5, 5, 0, 73, 35, C2D_Color32(0x00, 0x00, 0x00, 0x9F));
+	C2D_DrawRectSolid(83, 5, 0, 73, 35, C2D_Color32(0x00, 0x00, 0x00, 0x9F));
+	C2D_DrawRectSolid(161, 5, 0, 73, 35, C2D_Color32(0x00, 0x00, 0x00, 0x9F));
+	C2D_DrawRectSolid(239, 5, 0, 76, 35, C2D_Color32(0x00, 0x00, 0x00, 0x9F));
 
 	C2D_DrawRectSolid(5, 45, 0, 310, 60, C2D_Color32(0x00, 0x00, 0x00, 0x9F));
 	C2D_DrawRectSolid(5, 110, 0, 310, 60, C2D_Color32(0x00, 0x00, 0x00, 0x9F));
@@ -152,6 +185,8 @@ const char* scene_topic_select_render(AppState* state, C3D_RenderTarget* top, C3
 			C2D_DrawText(&dynText, C2D_AlignCenter | C2D_WithColor, 160, 65 + 65 * (i - first), 0, 0.5f, 0.5f, white);
 		}
 	}
+	for(int i = 0; i < 4; i++)
+		C2D_DrawText(&g_buttons[i], C2D_AlignCenter | C2D_WithColor, 40 + 78 * i, 12.5, 0, .55, .55, C2D_Color32(0xff, 0xff, 0xff, 0xff));
 
     C3D_FrameEnd(0);
 
@@ -160,7 +195,9 @@ const char* scene_topic_select_render(AppState* state, C3D_RenderTarget* top, C3
     C2D_TargetClear(top, accent_bg);
     C2D_SceneBegin(top);
 
-	C2D_DrawText(&g_staticTitle, C2D_AlignCenter, 200, 100, 0, .8, .8);
+	// Draw static text strings
+	C2D_DrawText(&g_staticTitle, C2D_AlignCenter, 200, 80, 0, .8, .8);
+	C2D_DrawText(&g_staticText, C2D_AlignCenter, 200, 115, 0, .55, .55);
 
     C3D_FrameEnd(0);
 
