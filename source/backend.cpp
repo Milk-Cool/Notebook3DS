@@ -7,13 +7,20 @@ void init_backend() {
         mkdir(PATH_ROOT, 0700);
     }
 }
-vector<Folder> get_folders() {
+typedef struct {
+    string alphabetical;
+    time_t time;
+} SortKey;
+// TODO: simplify using std::sort
+vector<Folder> get_folders(SortType sort_type, SortDirection sort_direction) {
     vector<Folder> out;
+    vector<SortKey> keys;
     DIR* dir = opendir(PATH_ROOT);
     struct dirent* entry;
     if(!dir) return out;
     while((entry = readdir(dir)) != NULL) {
         if(entry->d_type != DT_DIR) continue;
+        if(!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, "..")) continue;
         Folder folder;
         folder.id = entry->d_name;
         char path[256];
@@ -24,14 +31,71 @@ vector<Folder> get_folders() {
         fgets(name, 256, file);
         fclose(file);
         folder.name = strdup(name);
-        out.push_back(folder);
+
+        struct stat attr;
+        stat(path, &attr);
+        SortKey key = { .alphabetical = folder.name, .time = attr.st_mtime };
+        if(out.size() == 0) {
+            out.push_back(folder);
+            keys.push_back(key);
+        } else {
+            bool found = false;
+            for(u32 i = 0; i < out.size(); i++) {
+                if(sort_type == SortTypeAlphabetical) {
+                    if(sort_direction == SortDirectionAscending) {
+                        if(strcmp(folder.name.c_str(), out[i].name.c_str()) < 0) {
+                            out.insert(out.begin() + i, folder);
+                            keys.insert(keys.begin() + i, key);
+                            found = true;
+                            break;
+                        }
+                    } else {
+                        if(strcmp(folder.name.c_str(), out[i].name.c_str()) >= 0) {
+                            out.insert(out.begin() + i, folder);
+                            keys.insert(keys.begin() + i, key);
+                            found = true;
+                            break;
+                        }
+                    }
+                } else if(sort_type == SortTypeModification) {
+                    if(sort_direction == SortDirectionAscending) {
+                        if(attr.st_mtime < keys[i].time) {
+                            out.insert(out.begin() + i, folder);
+                            keys.insert(keys.begin() + i, key);
+                            found = true;
+                            break;
+                        }
+                    } else {
+                        if(attr.st_mtime >= keys[i].time) {
+                            out.insert(out.begin() + i, folder);
+                            keys.insert(keys.begin() + i, key);
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            if(!found) {
+                if(sort_direction == SortDirectionAscending) {
+                    out.push_back(folder);
+                    keys.push_back(key);
+                } else {
+                    out.insert(out.begin(), folder);
+                    keys.insert(keys.begin(), key);
+                }
+            }
+        }
     }
     closedir(dir);
     return out;
 }
+vector<Folder> get_folders() {
+    return get_folders(SortTypeAlphabetical, SortDirectionAscending);
+}
 
-vector<Topic> get_topics(string folder_id) {
+vector<Topic> get_topics(string folder_id, SortType sort_type, SortDirection sort_direction) {
     vector<Topic> out;
+    vector<SortKey> keys;
     char folder_path[256];
     snprintf(folder_path, 256, PATH_ROOT "%s/", folder_id.c_str());
     DIR* dir = opendir(folder_path);
@@ -39,6 +103,7 @@ vector<Topic> get_topics(string folder_id) {
     if(!dir) return out;
     while((entry = readdir(dir)) != NULL) {
         if(entry->d_type != DT_DIR) continue;
+        if(!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, "..")) continue;
         Topic topic;
         topic.id = entry->d_name;
         char path[256];
@@ -49,10 +114,66 @@ vector<Topic> get_topics(string folder_id) {
         fgets(name, 256, file);
         fclose(file);
         topic.name = strdup(name);
-        out.push_back(topic);
+
+        struct stat attr;
+        stat(path, &attr);
+        SortKey key = { .alphabetical = topic.name, .time = attr.st_mtime };
+        if(out.size() == 0) {
+            out.push_back(topic);
+            keys.push_back(key);
+        } else {
+            bool found = false;
+            for(u32 i = 0; i < out.size(); i++) {
+                if(sort_type == SortTypeAlphabetical) {
+                    if(sort_direction == SortDirectionAscending) {
+                        if(strcmp(topic.name.c_str(), out[i].name.c_str()) < 0) {
+                            out.insert(out.begin() + i, topic);
+                            keys.insert(keys.begin() + i, key);
+                            found = true;
+                            break;
+                        }
+                    } else {
+                        if(strcmp(topic.name.c_str(), out[i].name.c_str()) >= 0) {
+                            out.insert(out.begin() + i, topic);
+                            keys.insert(keys.begin() + i, key);
+                            found = true;
+                            break;
+                        }
+                    }
+                } else if(sort_type == SortTypeModification) {
+                    if(sort_direction == SortDirectionAscending) {
+                        if(attr.st_mtime < keys[i].time) {
+                            out.insert(out.begin() + i, topic);
+                            keys.insert(keys.begin() + i, key);
+                            found = true;
+                            break;
+                        }
+                    } else {
+                        if(attr.st_mtime >= keys[i].time) {
+                            out.insert(out.begin() + i, topic);
+                            keys.insert(keys.begin() + i, key);
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            if(!found) {
+                if(sort_direction == SortDirectionAscending) {
+                    out.push_back(topic);
+                    keys.push_back(key);
+                } else {
+                    out.insert(out.begin(), topic);
+                    keys.insert(keys.begin(), key);
+                }
+            }
+        }
     }
     closedir(dir);
     return out;
+}
+vector<Topic> get_topics(string folder_id) {
+    return get_topics(folder_id, SortTypeAlphabetical, SortDirectionAscending);
 }
 
 vector<Page> get_pages(string folder_id, string topic_id) {
@@ -64,6 +185,7 @@ vector<Page> get_pages(string folder_id, string topic_id) {
     if(!dir) return out;
     while((entry = readdir(dir)) != NULL) {
         if(entry->d_type != DT_REG) continue;
+        if(!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, "..")) continue;
         if(!strcmp(entry->d_name, NAMEFILE)) continue;
         char path[512];
         sniprintf(path, 512, "%s%s", topic_path, entry->d_name);
@@ -153,6 +275,7 @@ bool remove_dir_rec(string path) {
     if(path[path.size() - 1] != '/')
         path.push_back('/');
     while((entry = readdir(dir)) != NULL) {
+        if(!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, "..")) continue;
         if(entry->d_type == DT_DIR)
             if(!remove_dir_rec(path + entry->d_name)) return false;
         unlink((path + entry->d_name).c_str());

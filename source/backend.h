@@ -9,6 +9,15 @@
 #include <list>
 using namespace std;
 
+typedef enum {
+    SortTypeAlphabetical,
+    SortTypeModification
+} SortType;
+typedef enum {
+    SortDirectionAscending,
+    SortDirectionDescending
+} SortDirection;
+
 typedef struct {
 	string id;
 	string name;
@@ -44,7 +53,9 @@ typedef struct {
 #define NAMEFILE ".notebook"
 
 void init_backend();
+vector<Folder> get_folders(SortType sort_type, SortDirection sort_direction);
 vector<Folder> get_folders();
+vector<Topic> get_topics(string folder_id, SortType sort_type, SortDirection sort_direction);
 vector<Topic> get_topics(string folder_id);
 vector<Page> get_pages(string folder_id, string topic_id);
 

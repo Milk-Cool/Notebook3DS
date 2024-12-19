@@ -3,6 +3,9 @@
 #include "drawing_state.h"
 
 typedef struct {
+	SortType sort_type;
+	SortDirection sort_direction;
+
 	vector<Folder> folders;
 
 	uint32_t current_folder_index;

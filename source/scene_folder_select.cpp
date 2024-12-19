@@ -7,12 +7,12 @@
 const char* scene_folder_select_name = "folder_select";
 
 static C2D_TextBuf g_staticBuf, g_dynamicBuf;
-static C2D_Text g_staticText, g_staticTitle, g_buttons[3];
+static C2D_Text g_staticText, g_staticTitle, g_buttons[3], g_sorting;
 
 static s32 current_selection;
 
 void init_folders(AppState* state) {
-	state->folders = get_folders();
+	state->folders = get_folders(state->sort_type, state->sort_direction);
 	current_selection = 0;
 }
 void deinit_folders(AppState* state) {
@@ -31,7 +31,7 @@ bool scene_folder_select_init(AppState* state) {
 	init_folders(state);
 
 	// // Parse the static text strings
-	C2D_TextParse(&g_staticText, g_staticBuf, "Select folder or press  to create a new one\nPress  to remove, or SELECT to rename");
+	C2D_TextParse(&g_staticText, g_staticBuf, "Select folder or press  to create a new one\nPress  to remove, or SELECT to rename\nHold  & press  to change sorting method\nHold  & press  to change sorting direction");
 	C2D_TextParse(&g_staticTitle, g_staticBuf, "Notebook3DS");
 
 	C2D_TextParse(&g_buttons[0], g_staticBuf, "Create");
@@ -72,6 +72,22 @@ const char* scene_folder_select_input(AppState* state, u32 down, u32 held) {
 
     if (down & KEY_START) {
         return nullptr;
+	}
+	if(down & KEY_L && held & KEY_R) {
+		// TODO: cycle, not just change
+		if(state->sort_direction == SortDirectionAscending)
+			state->sort_direction = SortDirectionDescending;
+		else
+			state->sort_direction = SortDirectionAscending;
+		reinit_folders(state);
+		return "";
+	} else if(down & KEY_R && held & KEY_L) {
+		if(state->sort_type == SortTypeAlphabetical)
+			state->sort_type = SortTypeModification;
+		else
+			state->sort_type = SortTypeAlphabetical;
+		reinit_folders(state);
+		return "";
 	}
 	if(down & KEY_X) {
 		create(state);
@@ -181,8 +197,16 @@ const char* scene_folder_select_render(AppState* state, C3D_RenderTarget* top, C
     C2D_SceneBegin(top);
 
 	// Draw static text strings
-	C2D_DrawText(&g_staticTitle, C2D_AlignCenter, 200, 80, 0, .8, .8);
-	C2D_DrawText(&g_staticText, C2D_AlignCenter, 200, 115, 0, .55, .55);
+	C2D_DrawText(&g_staticTitle, C2D_AlignCenter, 200, 70, 0, .8, .8);
+	C2D_DrawText(&g_staticText, C2D_AlignCenter, 200, 105, 0, .55, .55);
+
+	C2D_TextParse(&g_sorting, g_dynamicBuf, (string("Sorting ") + (
+		state->sort_type == SortTypeAlphabetical ? "alphabetically" : (state->sort_type == SortTypeModification ? "by modification" : "randomly")
+	) + " " + (
+		state->sort_direction == SortDirectionAscending ? "(ascending)" : "(descending)"
+	)).c_str());
+	C2D_TextOptimize(&g_sorting);
+	C2D_DrawText(&g_sorting, C2D_AlignCenter, 200, 225, 0, .4, .4);
 
     C3D_FrameEnd(0);
 
