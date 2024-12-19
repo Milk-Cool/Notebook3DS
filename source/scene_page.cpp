@@ -50,10 +50,14 @@ static void handle_input(AppState* state, u32 down, u32 held, Page* current_page
         uint16_t y = touch.py + (int32_t)state->dstate.scroll;
         if(y >= PAGE_HEIGHT)
             y = PAGE_HEIGHT - 1;
-        current_page->shapes.back().points.push_back((Point){
-            .x = touch.px,
-            .y = y
-        });
+        if(current_page->shapes.back().points.size() == 0
+                || dist2(current_page->shapes.back().points.back().x,
+                    current_page->shapes.back().points.back().y,
+                    touch.px, y) >= 4)
+            current_page->shapes.back().points.push_back((Point){
+                .x = touch.px,
+                .y = y
+            });
         state->dstate.last_point_time = curtime;
     } else if((state->dstate.current_tool == ToolLine
             || state->dstate.current_tool == ToolFillRect
