@@ -27,8 +27,8 @@ const char* scene_danger_zone_input(AppState* state, u32 down, u32 held) {
     u64 curtime = osGetTime();
     if(down & KEY_A) {
         state->dstate.input_queue_a.push(curtime);
-        if(state->dstate.input_queue_a.size() == 3) {
-            state->dstate.input_queue_a.pop();
+        if(state->dstate.input_queue_a.size() >= 2) {
+            if(state->dstate.input_queue_a.size() == 3) state->dstate.input_queue_a.pop();
             if(state->dstate.input_queue_a.back() - state->dstate.input_queue_a.front() < DBLPRESS_MAX_DELAY) {
                 state->current_pages[state->current_page_index].shapes.clear();
                 clear_undid(state);
