@@ -209,7 +209,6 @@ const char* scene_page_input(AppState* state, u32 down, u32 held) {
         state->dstate.input_queue_l.push(curtime);
         if(state->dstate.input_queue_l.size() >= 2) {
             if(state->dstate.input_queue_l.size() == 3) state->dstate.input_queue_l.pop();
-            state->dstate.input_queue_l.pop();
             if(state->dstate.input_queue_l.back() - state->dstate.input_queue_l.front() < DBLPRESS_MAX_DELAY)
                 undo(state);
         }
@@ -218,7 +217,6 @@ const char* scene_page_input(AppState* state, u32 down, u32 held) {
         state->dstate.input_queue_r.push(curtime);
         if(state->dstate.input_queue_r.size() >= 2) {
             if(state->dstate.input_queue_r.size() == 3) state->dstate.input_queue_r.pop();
-            state->dstate.input_queue_r.pop();
             if(state->dstate.input_queue_r.back() - state->dstate.input_queue_r.front() < DBLPRESS_MAX_DELAY)
                 redo(state);
         }
